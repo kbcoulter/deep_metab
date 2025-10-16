@@ -5,6 +5,9 @@
 - SETUP AND ACTIVATE CONDA ENVIRONMENT: Use the file requirements.txt
 
 - PREP DATA AND FORMAT AS EXPECTED
+	- CALC DEAD VOLUME: DV = Pi * (Col Diam / 2 ) * (Col Length or Height)
+	- USP CODE -> UCSD -> 92093
+
 - PICKLE CSV FOR METADATA
 - RENAME DATA
 
