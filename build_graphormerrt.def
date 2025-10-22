@@ -1,0 +1,77 @@
+#########################################
+### Apptainer for Graphormer-RT (CPU) ###
+#########################################
+
+Bootstrap: docker
+From: ubuntu:22.04
+
+%environment
+    ### FORCE CPU ###
+    export CUDA_VISIBLE_DEVICES=""
+    export DGL_FORCE_CUDA=0
+    export DGLBACKEND=pytorch
+    export OMP_NUM_THREADS=4
+    export PATH=/opt/conda/bin:$PATH
+    export CONDA_DEFAULT_ENV=graphormer-rt
+    export PATH=/opt/conda/envs/graphormer-rt/bin:$PATH
+
+%labels
+    ### OPTIONS ###
+    Author KC
+    Version 1.0
+    Description Graphormer-RT CPU container for HPC
+
+%post
+    ### PACKAGES ###
+    apt-get update && apt-get install -y \
+        wget \
+        git \
+        build-essential \
+        ca-certificates \
+        && rm -rf /var/lib/apt/lists/*
+
+    ### INSTALL MINICONDA ###
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+    bash /tmp/miniconda.sh -b -p /opt/conda
+    rm /tmp/miniconda.sh
+
+    ### CREATE CONDA ENV ###
+    /opt/conda/bin/conda create -n graphormer-rt python=3.9.18 -y
+    /opt/conda/envs/graphormer-rt/bin/pip install --upgrade "pip<24.1"
+
+    ### CLONE RT REPO ###
+    mkdir -p /workspace
+    cd /workspace
+    git clone https://github.com/HopkinsLaboratory/Graphormer-RT.git
+    cd Graphormer-RT/fairseq
+
+    ### INSTALL FAIRSEQ ###
+    /opt/conda/envs/graphormer-rt/bin/pip install --editable ./
+
+    ### PYTHON OPTIONS (DEPENDENCIES) ###
+    /opt/conda/envs/graphormer-rt/bin/pip install \
+        torch==2.1.0 \
+        torchvision \
+        torchaudio==2.1.0 \
+        dgl==1.1.3 \
+        torch-geometric==2.4.0 \
+        torch-scatter \
+        torch-sparse \
+        ogb==1.3.2 \
+        rdkit-pypi==2022.9.5 \
+        matplotlib \
+        numpy==1.23 \
+        dgllife==0.3.2 \
+        mordred==1.2.0 \
+        tensorboardX
+
+# %files
+    ### PRECOMPILED .so FILES GO HERE ###
+    ### WARNING... THIS CAN GET MESSY ###
+
+%runscript
+    ### ACTIVATE CONDA WHEN CONTAINER RUNS ###
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate graphormer-rt
+    cd /workspace/Graphormer-RT
+    exec /bin/bash "$@"
