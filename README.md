@@ -1,10 +1,19 @@
 # deep_metab
+
 Applying Deep Learning Methods to LC-MS Metabolomics Data to Improve Metabolite Identification
 
-TO BUILD CONTAINER ON HPC:
+# TO BUILD CONTAINER ON HPC:
+### DO NOT MOVE .sif FILES !
 
+Edit the slurm options in runmodel_apptainer.sh,
+but do not change .sif name:
+
+```
 $ apptainer build graphformercontainer.sif docker://dnhem/proj_deepmetab:v0.0
-#APPTAINER IS PRE INSTALLED AS A MODULE ON TALAPAS
-# !!! DO NOT MOVE .sif FILES ELSEWHERE !!!
+
+$ sbatch runmodel_apptainer.sh 
+
+```
+
 
 
