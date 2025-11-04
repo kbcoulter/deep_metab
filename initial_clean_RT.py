@@ -17,8 +17,18 @@ parser.add_argument(
     "--input_file",
     '-i',
     type=Path,  
+    required=True,
     help="The input file to process.",
 )
+
+parser.add_argument(
+    "--data_id",
+    '-d',
+    type=str, 
+    required=True,
+    help="The data id of the sample run.",
+)
+
 
 #Get input file
 temp_args, _ = parser.parse_known_args()
@@ -58,7 +68,7 @@ FINAL_COLUMN_ORDER = [
 
 
 # A row is kept if it has ALL REQUIRED_FIELDS *and* AT LEAST ONE CONDITIONAL_FIELD.
-with open('/Users/eisrael/bioinfo/deep_metab/sample.csv', 'r') as csv_file, open('sample.tsv','w') as cleaned_tsv_file:
+with open(args.input_file, 'r') as csv_file, open(args.output_file,'w') as cleaned_tsv_file:
     mapping_rules = [
         ('pubchem.smiles.canonical', 'pubchem.smiles.canonical'),
         ('pubchem.cid', 'pubchem.cid'),
@@ -180,6 +190,11 @@ with open('/Users/eisrael/bioinfo/deep_metab/sample.csv', 'r') as csv_file, open
             original_key = inverted_remapped.get(column_name)
             if original_key and original_key in original_row:
                 value = original_row[original_key]
+                
+                # Prepend the data ID (experiment) to the sample ID
+                if column_name == 'id' and value:
+                    value = f"{args.data_id}_{value}"
+
                 FINAL_ROW_VALUES.append(value)
             else:
                 FINAL_ROW_VALUES.append('')
@@ -188,7 +203,7 @@ with open('/Users/eisrael/bioinfo/deep_metab/sample.csv', 'r') as csv_file, open
         mono_id = original_row.get("Monoisotopic Mass Feature ID")
         mass_id = original_row.get("Mass Feature ID")
         if (mono_id is not None and mono_id != '') and mono_id != mass_id:
-            print(f"Skipping row (different IDs): {original_row}")
+            #print(f"Skipping row (different IDs): {original_row}")
             continue
 
         # Check all necessary fields and at least one conditional field is satisfied
