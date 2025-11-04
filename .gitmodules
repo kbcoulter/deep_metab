@@ -1,0 +1,3 @@
+[submodule "Graphormer-RT"]
+	path = Graphormer-RT
+	url = https://github.com/HopkinsLaboratory/Graphormer-RT.git
