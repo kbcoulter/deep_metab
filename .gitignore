@@ -1,1 +1,6 @@
 *.sif
+*.png
+*.csv
+*.tsv
+*.pt
+*.log
