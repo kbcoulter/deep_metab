@@ -1,13 +1,17 @@
 #!/bin/bash
 
-#SBATCH --account=kcoulter
-#SBATCH --partition=gpulong
+#SBATCH --account=bgmp
+#SBATCH --partition=gpu
 #SBATCH --job-name=deep_metab_apptainer
-#SBATCH --time= 3:00:00
+#SBATCH --time=3:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
-#SBATCH --constraint=gpu-80gb
+#SBATCH --constraint=gpu-10gb
+#SBATCH --output=metab_%j.out.log
+#SBATCH --error=metab_%j.err.log
+
+module load nvidia/cuda
 
 mkdir -p ./graphormer_checkpoints
 
@@ -21,5 +25,4 @@ chmod +x RP.sh
 bash RP.sh
 "
 
-exit
 
