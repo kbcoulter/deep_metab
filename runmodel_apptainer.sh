@@ -11,17 +11,13 @@
 #SBATCH --output=metab_%j.out.log
 #SBATCH --error=metab_%j.err.log
 
-module load nvidia/cuda
-
 mkdir -p ./graphormer_checkpoints
 
 apptainer exec --nv \
     --bind ./graphormer_checkpoints:/workspace/Graphormer-RT/checkpoints \
     graphormercontainer.sif bash -c "
-pip install tensorboardX &&
-pip install 'Cython<3.0' &&
-cd /workspace/Graphormer-RT/examples/property_prediction/
-chmod +x RP.sh  
+source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
+cd /workspace/Graphormer-RT/examples/property_prediction/ && \
 bash RP.sh
 "
 
