@@ -16,5 +16,5 @@ apptainer exec --nv \
     --bind ./graphormer_checkpoints:/workspace/Graphormer-RT/checkpoints \
     graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
-    ./deep_metab/Graphormer-RT/graphormer/evaluate/evaluate_RP.sh
+    ./Graphormer-RT/graphormer/evaluate/evaluate_RP.sh
 "
