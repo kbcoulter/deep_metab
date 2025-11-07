@@ -9,8 +9,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
 #SBATCH --constraint=gpu-10gb
-#SBATCH --output=metab_eval_%j.out.log
-#SBATCH --error=metab_eval_%j.err.log
+#SBATCH --output=evaluate_RP_%j.out.log
+#SBATCH --error=evaluate_RP_%j.err.log
 
 apptainer exec --nv \
     --bind ./graphormer_checkpoints:/workspace/Graphormer-RT/checkpoints \

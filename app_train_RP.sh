@@ -1,5 +1,5 @@
 #!/bin/bash
-
+### BROKEN! 
 #SBATCH --account=bgmp
 #SBATCH --partition=gpu
 #SBATCH --job-name=deep_metab_apptainer

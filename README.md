@@ -2,16 +2,27 @@
 
 Applying Deep Learning Methods to LC-MS Metabolomics Data to Improve Metabolite Identification
 
-# TO BUILD CONTAINER ON HPC:
+# TO RUN ON HPC:
 ### DO NOT MOVE .sif FILES !
 
-Edit the slurm options in runmodel_apptainer.sh,
-but do not change .sif name:
+
+Do not change .sif name and take caution editing the following paths, as they are binded:
+```
+workspace/Graphormer-RT/checkpoints/
+graphormer_checkpoints/
+```
 
 ```
-$ apptainer build graphformercontainer.sif docker://dnhem/proj_deepmetab:v0.0
+$ apptainer build graphormercontainer.sif docker://dnhem/proj_deepmetab:v0.1
+$ mkdir -p predictions
 
-$ sbatch runmodel_apptainer.sh 
+# IF TRAINING
+#BROKEN -> $ sbatch runmodel_apptainer.sh
+
+# IF USING PRESET
+$ mkdir -p graphormer_checkpoints && wget https://zenodo.org/records/15021743/files/oct30_RP_unc.pt?download=
+1 -O graphormer_checkpoints/oct30_RP_unc.pt 
+
 
 ```
 
