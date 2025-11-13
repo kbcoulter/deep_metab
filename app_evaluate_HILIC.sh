@@ -9,11 +9,11 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
 #SBATCH --constraint=gpu-10gb
-#SBATCH --output=evaluate_RP_%j.out.log
-#SBATCH --error=evaluate_RP_%j.err.log
+#SBATCH --output=evaluate_HILIC_%j.out.log
+#SBATCH --error=evaluate_HILIC_%j.err.log
 
 apptainer exec --nv \
-    --bind ./graphormer_checkpoints_RP:/workspace/Graphormer-RT/checkpoints_RP \
+    --bind ./graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
     graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
     cd ./Graphormer-RT/graphormer/evaluate/ && \
@@ -34,7 +34,7 @@ apptainer exec --nv \
         --mlp-layers 5 \
         --batch-size 64 \
         --num-classes 1 \
-        --save-path '../../../predictions_RP/RP_preds.csv' \
-        --save-dir '/workspace/Graphormer-RT/checkpoints_RP/' \
+        --save-path '../../../predictions_HILIC/HILIC_preds.csv' \
+        --save-dir '/workspace/Graphormer-RT/checkpoints_HILIC/' \
         --split train
 "
