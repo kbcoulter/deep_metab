@@ -12,6 +12,13 @@
 #SBATCH --output=evaluate_RP_%j.out.log
 #SBATCH --error=evaluate_RP_%j.err.log
 
+# Folder name of Graphormer-RT predictions initialized to preds_<sbatch job #>
+PREDS_DIR="preds_${SLURM_JOB_ID}"
+
+# Create the directory on the host *before* running the container
+mkdir -p "$PREDS_DIR"
+
+# Run evaluate.py in Graphormer-RT under our container
 apptainer exec --nv \
     --bind ./graphormer_checkpoints_RP:/workspace/Graphormer-RT/checkpoints_RP \
     graphormercontainer.sif bash -c "
@@ -34,7 +41,7 @@ apptainer exec --nv \
         --mlp-layers 5 \
         --batch-size 64 \
         --num-classes 1 \
-        --save-path '../../../predictions_RP/RP_preds.csv' \
+        --save-path '../../../$PREDS_DIR/RP_preds.csv' \
         --save-dir '/workspace/Graphormer-RT/checkpoints_RP/' \
         --split train
 "
