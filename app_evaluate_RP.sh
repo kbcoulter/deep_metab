@@ -12,17 +12,40 @@
 #SBATCH --output=evaluate_RP_%j.out.log
 #SBATCH --error=evaluate_RP_%j.err.log
 
-# Folder name of Graphormer-RT predictions initialized to preds_<sbatch job #>
-PREDS_DIR="preds_${SLURM_JOB_ID}"
-
-# Create the directory on the host *before* running the container
+# Define a folder name for all Graphormer-RT predictions you intend on producing
+# PREDS_DIR="preds_${SLURM_JOB_ID}"
+PREDS_DIR="Graphormer_RT_model_predictions"
 mkdir -p "$PREDS_DIR"
+
+# Data file of this Graphormer-RT prediction instance, initialized to <sbatch job #>.csv
+DATA_DIR="${SLURM_JOB_ID}.csv"
+
+# Define the HOST directory containing your data.
+# NOTE: There are 2 necessary specifications. 1) The directory is an absolute path. 2) The directory only contains 2 files, a .csv for retention time data and a .pickle for chromatography sample conditions.
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer"
+CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
+CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
+
+# CONTAINER_DATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer/finetune_0003_RP.csv" # <-- Retention time data
+# CONTAINER_METADATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer/RP_metadata.pickle" # <-- Chromatography sample conditions
+# HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data"
+# CONTAINER_DATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data/sample_rt_clean.tsv" # <-- Retention time data
+# CONTAINER_METADATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data/metadata_clean.tsv" # <-- Chromatography time data
+
+
+# Create the data directory on the host *before* running the container
+# mkdir -p "$HOST_DATA_DIR"
 
 # Run evaluate.py in Graphormer-RT under our container
 apptainer exec --nv \
     --bind ./graphormer_checkpoints_RP:/workspace/Graphormer-RT/checkpoints_RP \
+    --bind ${HOST_DATA_DIR}:/data \
     graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
+    
+    export RP_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"
+    export RP_METADATA_PATH=\"${CONTAINER_METADATA_FILE}\"
+
     cd ./Graphormer-RT/graphormer/evaluate/ && \
     python evaluate.py \
         --user-dir ../../graphormer \
@@ -41,7 +64,7 @@ apptainer exec --nv \
         --mlp-layers 5 \
         --batch-size 64 \
         --num-classes 1 \
-        --save-path '../../../$PREDS_DIR/RP_preds.csv' \
+        --save-path '../../../$PREDS_DIR/$DATA_DIR' \
         --save-dir '/workspace/Graphormer-RT/checkpoints_RP/' \
         --split train
 "
