@@ -13,8 +13,7 @@
 #SBATCH --error=evaluate_RP_%j.err.log
 
 # Define a folder name for all Graphormer-RT predictions you intend on producing
-# PREDS_DIR="preds_${SLURM_JOB_ID}"
-PREDS_DIR="Graphormer_RT_model_predictions"
+PREDS_DIR="predictions_RP"
 mkdir -p "$PREDS_DIR"
 
 # Data file of this Graphormer-RT prediction instance, initialized to <sbatch job #>.csv
@@ -25,16 +24,6 @@ DATA_DIR="${SLURM_JOB_ID}.csv"
 HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer"
 CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
-
-# CONTAINER_DATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer/finetune_0003_RP.csv" # <-- Retention time data
-# CONTAINER_METADATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer/RP_metadata.pickle" # <-- Chromatography sample conditions
-# HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data"
-# CONTAINER_DATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data/sample_rt_clean.tsv" # <-- Retention time data
-# CONTAINER_METADATA_FILE="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data/metadata_clean.tsv" # <-- Chromatography time data
-
-
-# Create the data directory on the host *before* running the container
-# mkdir -p "$HOST_DATA_DIR"
 
 # Run evaluate.py in Graphormer-RT under our container
 apptainer exec --nv \
