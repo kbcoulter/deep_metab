@@ -21,8 +21,9 @@ DATA_DIR="${SLURM_JOB_ID}.csv"
 
 # Define the HOST directory containing your data.
 # NOTE: There are 2 necessary specifications. 1) The directory is an absolute path. 2) The directory only contains 2 files, a .csv for retention time data and a .pickle for chromatography sample conditions.
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer"
-CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_0001"
+#HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/sample_data_from_graphormer"
+CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.tsv" -print -quit) # <-- Retention time data
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
 
 # Run evaluate.py in Graphormer-RT under our container
