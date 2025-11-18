@@ -1,0 +1,73 @@
+###########################
+### Deep Metab Notebook ###
+###########################
+
+# kcoulter <at> uoregon.edu
+#
+#
+# 2025 - Oct
+
+
+    #######################
+    ### LINKS AND PATHS ###
+    #######################
+
+        TALAPAS PROJ PATH: /projects/bgmp/shared/groups/2025/deepmetab/
+        OUT DATA PATH: 
+        env: None
+
+        DOCKER IMAGE: https://hub.docker.com/r/dnhem/proj_deepmetab # NEEDS UPDATE
+        ZENODO LINKS: https://zenodo.org/records/15021743
+
+    ####################
+    ### DOCKER SETUP ###
+    ####################
+
+        Numpy version 1.23.5 not 1.23.0 -> Update docker to version 0.3 and include
+
+    ##################
+    ### ALL SETUP ####
+    ##################
+
+        ### Please Set Up Submodule after cloning ###
+            $ git submodule --init --update
+
+    ####################
+    ### SETUP FOR RP ###
+    ####################
+
+        ### Please create dir for model vals ###
+            $ mkdir -p graphormer_checkpoints_RP
+        
+        ### Either Train Model or Wget Model Weights ###
+            $ wget -O graphormer_checkpoints_RP/oct30_RP_unc.pt https://zenodo.org/records/15021743/files/oct30_RP_unc.pt?download=1 &&\
+            $ sbatch ./app_train_RP.sh
+                # Running Model on Trained Data fails → accuracy = 0… but model loss converges/settles... hmm
+
+        ### Please build the [docker](https://hub.docker.com/r/dnhem/proj_deepmetab) image made available online. ###
+            $ apptainer build graphormercontainer.sif docker://dnhem/proj_deepmetab:v0.1 # NOTE VERSION
+        
+        ### Please create predictions_RP directory ### 
+            $ mkdir -p predictions_RP     
+
+    #############################
+    ### EVALUATE EXAMPLE DATA ###
+    #############################
+
+        ### $ sbatch evaluate_ex_apptainer.sh 
+            !!! FILE NO LONGER EXISTS !!!
+
+    ##############################
+    ### EVALUATE PERSONAL DATA ###
+    ##############################
+
+
+    #################
+    ### DEV NOTES ###
+    #################
+
+    # training_loss.py script needs to be fixed -> Inefficient Loop -> kcoulter
+
+    ??? where did evaluate_ex_apptainer.sh go ???
+        Did I lose this -> Not a big deal, just curious how a file got lost.
+
