@@ -29,6 +29,7 @@
     ### ALL SETUP ####
     ##################
 
+        !!! THIS STEP IS ESSENTIAL !!!
         ### Please Set Up Submodule after cloning ###
             $ git submodule --init --update
 
