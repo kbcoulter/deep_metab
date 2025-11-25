@@ -261,6 +261,10 @@
     ### DEV NOTES ###
     #################
 
+    Function calls - Ethan:
+    ./analyze_predictions.py -i /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/predictions_RP/40199700.csv 
+    ./initial_clean_RT.py --option 1 --sampleID 0001 --input_file /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/raw_data/0001_sample_rt_raw.csv --output_file sample_rt_clean.tsv
+
     # training_loss.py script needs to be fixed -> Inefficient Loop -> kcoulter
 
     ??? where did evaluate_ex_apptainer.sh go ???
