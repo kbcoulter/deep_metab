@@ -6,3 +6,4 @@
 *.log
 *.pickle
 *.pkl
+*_checkpoints_*

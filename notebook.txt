@@ -3,8 +3,8 @@
 ###########################
 
 # kcoulter <at> uoregon.edu
-#
-#
+# ewi <at> uoregon.edu
+# dnhem <at> uoregon.edu
 # 2025 - Oct
 
 
@@ -257,6 +257,36 @@
 
         NOTE: Same with Gen_Col_Dict updated, this usage assumes these files are in your current pwd.
 
+    ###########################
+    ### HILIC SETUP CHANGES ###
+    ###########################
+        !! IN THE BRANCH HILIC AND SETUP CHANGES
+        ~ Note: Changed to Notebook, gitignore, and ReadMe were pushed to master/main
+
+        # Changes to Unused Scripts:
+            Changed the given evaluate scripts to exit when called. Prints a message explaining that this is outside of the deep_metab workflow:
+                Graphormer-RT/graphormer/evaluate/evaluate_RP.sh
+                Graphormer-RT/graphormer/evaluate/evaluate_HILIC.sh
+            
+            Changed the ReadMe setup for RP to be a setup file for RP predictions and a separate for HILIC:
+                Altered: 
+                    app_evaluate_RP.sh
+                    app_evaluate_HILIC.sh
+                Created:
+                    setup/RP.sh
+                    setup/HILIC.sh
+
+            Made comments to indicate changes made in 
+                evaluate.py 
+                evaluate_HILIC.py
+
+            Created setup_HPC dir containing 
+                HILIC.sh -> To setup HILIC
+                RP.sh -> To setup RP
+                HILIC_RP.sh -> To setup Both 
+            
+            Edited ReadMe with updated instructions
+            
     #################
     ### DEV NOTES ###
     #################
@@ -270,3 +300,11 @@
     ??? where did evaluate_ex_apptainer.sh go ???
         Did I lose this -> Not a big deal, just curious how a file got lost.
 
+    Need to raise issue on OG graphormer-RT repo for the evaluate scripts. 
+    Need to raise issue on OG graphormer-RT repo for the changes Dom made in the formatting script. <- DOM
+
+    Need to edit app_evaluate_* to run from relative paths so users require no changes. 
+    Need to edit app_evaluate_* to take one option, which is data directory 
+    Need to move scrips into thier own directories to organize. 
+
+    Need to organize notebook by tab indenting so that the file is easy to nav. 

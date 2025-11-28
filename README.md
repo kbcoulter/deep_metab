@@ -5,7 +5,6 @@ Applying Deep Learning Methods to LC-MS Metabolomics Data to Improve Metabolite 
 # TO RUN ON HPC:
 ### DO NOT MOVE .sif FILES !
 
-
 Do not change .sif name and take caution editing the following paths, as they are binded:
 ```
 workspace/Graphormer-RT/checkpoints_RP/
@@ -14,40 +13,27 @@ workspace/Graphormer-RT/checkpoints_HILIC/
 graphormer_checkpoints_HILIC/
 ```
 
-## FOR ALL MODELS
-#### Please build the [docker](https://hub.docker.com/r/dnhem/proj_deepmetab) image made available online.
+## SETUP ##
+#### Run the appropriate setup script from within the setup_HPC directory, depending on your LC-MS configuration:
 ```
-$ apptainer build graphormercontainer.sif docker://dnhem/proj_deepmetab:v0.1 # NOTE VERSION
-```
-
-## Reverse Phase (RP) ###
-#### TRAINING CURRENTLY BROKEN, RUN PRETRAINED
-
-### 1A. IF TRAINING NEW MODEL ###
-```
-sbatch runmodel_apptainer.sh&& \
-mkdir -p predictions_RP 
+./RP.sh
+./HILIC.sh
+./HILIC_RP.sh
 ```
 
-### 1B. IF USING PRETRAINED ###
-```
-mkdir -p graphormer_checkpoints_RP &&\
-wget -O graphormer_checkpoints_RP/oct30_RP_unc.pt https://zenodo.org/records/15021743/files/oct30_RP_unc.pt?download=1 &&\
-mkdir -p predictions_RP
-```
+#### If you encounter errors, check the available image versions on [Docker Hub](https://hub.docker.com/r/dnhem/proj_deepmetab).
 
-### 2. EVALUATE / MAKE PREDICTIONS ###
-After editing options, run:
+Note: Evaluation with personally trained models is currently buggy, please use pretrained models. We are working to fix this issue. 
+
+
+## EVALUATION / RT PREDICTION ##
+### RP ###
 ```
-$ sbatch app_evaluate_RP.sh 
+$ sbatch app_evaluate_RP.sh # EDIT OPTIONS
 ``` 
 
-## HILIC ##
+### HILIC ###
 ```
-### CREATE PREDICTION FOLDER ###
-$ mkdir -p predictions_HILIC
-
-### MAKE EVALUATIONS ###
 $ sbatch app_evaluate_HILIC.sh # EDIT OPTIONS
 ```
 
