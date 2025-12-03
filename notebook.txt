@@ -286,6 +286,14 @@
                 HILIC_RP.sh -> To setup Both 
             
             Edited ReadMe with updated instructions
+    ##############################################
+    ### META-DATA DICT PICKLE FIX AND REFORMAT ###
+    ##############################################
+    In branch `dom_meta_fix`:
+
+    `dom_gen_pickle_dict.py`  uses argparse now. Required arguments are processed `data_directory` and an `output` directory. Optional arguments like `output_file` , `tanaka` and `hsmb` are given default arguments. `tanaka` and `hsmb` argument are inputted from our shared dir (`/projects/bgmp/shared/groups/2025/deepmetab/shared/`). The processed `data_directory` should contain directories of multiple chromatography setup ids. Inside each id dir, we should expect gradient.tsv, info.tsv and metadata.tsv. Since Katherine told us that we only needed one setup for all  the different samples she's giving us, we don't have to worry about manually creating those files since they all use the same setup.
+    
+    `dom_gen_pickle_dict.py` will reformat the metadata.tsv that is expected from each of the chromatography setup dir in processed `data_directory` to follow the same convention as the authors. Takes in an `template` file that should be from the authors, an `input` file that should be reformatted, an `output` file of the reformatted version and an output `dir` to specify where you want to store it.
             
     #################
     ### DEV NOTES ###
