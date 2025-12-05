@@ -171,9 +171,9 @@ for root, dirs, files in os.walk(path):
 
         t_no = dead[0]
 
-        if 'HILIC' in column_name or 'Amide' in column_name:
-            print("HILIC BROKE MY SHIT")
-            continue
+        # if 'HILIC' in column_name or 'Amide' in column_name:
+        #     print("HILIC BROKE MY SHIT")
+        #     continue
         
         A_mobile = meta_data[:, 9:18]
         A_add = meta_data[:, 18:48]
@@ -206,13 +206,23 @@ for root, dirs, files in os.walk(path):
         grad = grad_data[1:, :]
         grad = np.asarray(grad, dtype=np.float32)
 
+        #print(grad)
+
         pA = np.asarray(grad[:, 1], dtype=float)
         pB = np.asarray(grad[:, 2], dtype=float)
 
         fl = grad[:,-1]
         times = grad[:,0]
 
-        inflections = get_inflections(pB, times)
+        if dir == "0000":
+            print(pB)
+            print(times)
+            print("-----")
+        # MAJOR FIX HERE FOR HILIC
+        if 'HILIC' in column_name:
+            inflections = get_inflections(pA, times) #use PA for HILIC instead
+        else:
+            inflections = get_inflections(pB, times)
 
         t_crit = 0
 
@@ -231,18 +241,22 @@ for root, dirs, files in os.walk(path):
 
                 c+=1
 
-
-        if t_crit == 0: 
-            t_crit = inflections[-1][0]
+        # REMOVE THIS PART
+        # if t_crit == 0: 
+        #     t_crit = inflections[-1][0]
 
         grad_l = []
-        grad_l.extend([str(times[0]), str(pB[0])])
+        # FIX HEREEE FOR HILIC
+        if 'HILIC' in column_name:
+            grad_l.extend([str(times[0]), str(pA[0])])
+        else:
+            grad_l.extend([str(times[0]), str(pB[0])])
         c = 1
         count = 0
         t_prev = -1
         inflections.sort(key=lambda x: x[0])
-        t_pB_max = inflections[-1][0]
-        t_filter =  t_no + (0.01 * t_pB_max) ##  ## this is the trehold for compounds that are not retained on teh column
+        #t_pB_max = inflections[-1][0]
+        #t_filter =  t_no + (0.01 * t_pB_max) ##  ## this is the trehold for compounds that are not retained on teh column
 
         while count < len(inflections):
             t = inflections[count][0]
@@ -255,12 +269,16 @@ for root, dirs, files in os.walk(path):
             t_prev = t
             count+=1
 
-
         for infl in inflections:
             grad_l.extend([str(infl[0]), str(infl[1])])
             c+=1
 
-        pad = np.zeros((8-len(grad_l)))
+#### FIX PADDING HERE FOR HILIC
+        if len(grad_l) > 8:
+            pad = np.zeros(0)
+            grad_l = grad_l[:8]
+        else:     
+            pad = np.zeros((8-len(grad_l)))
         pad = np.asarray(pad, dtype=str)
         grad_l.extend(pad)
         assert grad_l[0] == '0.0'
@@ -315,6 +333,8 @@ for root, dirs, files in os.walk(path):
     # Pickle the column metadata dictionary
     print(n_rm, 'REMOVED DUE TO RT FILTERING FOR NOT RETAINED') # can just keep this incase we get the filter list
 
+    # Extra Debug
+    print(f'Existing Keys: {col_dict.keys()}')
     # modify pickle output name
     with open(f'{output}/{output_file}', 'wb') as file:
         pickle.dump(col_dict, file)
