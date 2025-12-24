@@ -1,0 +1,51 @@
+#!/bin/bash
+### NOTE: RUN THIS FROM deep_metab
+
+#SBATCH --account=bgmp
+#SBATCH --partition=gpu
+#SBATCH --job-name=apptainer_eval_HILIC
+#SBATCH --time=3:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus=1   
+#SBATCH --constraint=gpu-10gb
+#SBATCH --output=evaluate_HILIC_%j.out.log
+#SBATCH --error=evaluate_HILIC_%j.err.log
+
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/sample_data_0001"
+# SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
+
+#PREDS_DIR="predictions_RP"
+#mkdir -p "$PREDS_DIR"
+
+DATA_DIR="${SLURM_JOB_ID}.csv"
+CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
+CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
+
+apptainer exec --nv \
+    --bind ./graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
+    graphormercontainer.sif bash -c "
+    source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
+    export HILIC_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"
+    export HILIC_METADATA_PATH=\"${CONTAINER_METADATA_FILE}\"
+    cd ./Graphormer-RT/graphormer/evaluate/ && \
+    python evaluate_HILIC.py \
+        --user-dir ../../graphormer \
+        --num-workers 32 \
+        --ddp-backend=legacy_ddp \
+        --user-data-dir hilic_test \
+        --dataset-name HILIC_a \
+        --task graph_prediction \
+        --criterion rmse \
+        --arch graphormer_HILIC \
+        --encoder-layers 8 \
+        --encoder-embed-dim  512 \
+        --encoder-ffn-embed-dim 512 \
+        --encoder-attention-heads 64 \
+        --mlp-layers 5 \
+        --batch-size 64 \
+        --num-classes 1 \
+        --save-path '../../../predictions_HILIC/$DATA_DIR' \
+        --save-dir '/workspace/Graphormer-RT/checkpoints_HILIC/' \
+        --split train
+"
