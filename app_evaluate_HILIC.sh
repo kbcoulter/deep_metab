@@ -26,8 +26,8 @@ apptainer exec --nv \
     --bind ./graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
     graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
-    export RP_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"
-    export RP_METADATA_PATH=\"${CONTAINER_METADATA_FILE}\"
+    export HILIC_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"
+    export HILIC_METADATA_PATH=\"${CONTAINER_METADATA_FILE}\"
     cd ./Graphormer-RT/graphormer/evaluate/ && \
     python evaluate_HILIC.py \
         --user-dir ../../graphormer \

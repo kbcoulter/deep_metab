@@ -5,11 +5,12 @@ import argparse
 # set up argparse
 def get_args():
     parser = argparse.ArgumentParser(description="Reformat Metadata File Correctly.")
-    parser.add_argument('-t', '--template', help="Specify the template file.", required=True)
+    parser.add_argument('-t', '--template', help="Specify the template file.",
+                        default="/projects/bgmp/shared/groups/2025/deepmetab/dnhem/deep_metab/dom_processed_data/0001/0001_metadata.tsv")
     parser.add_argument('-i', '--input', help="Specify the file to be reformatted.", required=True)
-    parser.add_argument('-o', '--output', help="Specify an output file name.")
-    parser.add_argument('-d', '--dir', help="Specify Output Directory")
-    # parser.add_argument('-id', help="Specify ID of metadata file")
+    parser.add_argument('-d', '--dir', help="Specify Output Directory",
+                        default="/projects/bgmp/shared/groups/2025/deepmetab/dnhem/deep_metab/dom_processed_data")
+    parser.add_argument('-id', help="Specify ID of metadata file", required=True)
 
     return parser.parse_args()
 
@@ -17,8 +18,8 @@ args = get_args()
 # specify path to files
 template = args.template
 input = args.input
-output = args.output
 dir = args.dir
+id = args.id
 
 with open(template, newline="") as f1, open(input, newline="") as f2:
     r1 = list(csv.reader(f1, delimiter="\t"))
@@ -35,9 +36,15 @@ missing_as_blank_cols = [
     i for i, v in enumerate(row1_template) if v == ""
 ]
 
+zeroes_as_blank_cols =[
+    i for i, v in enumerate(row1_template) if v == "0"
+]
+
 print("Columns that use empty string for missing values:")
 for i in missing_as_blank_cols:
     print(i, header[i])
+# quick assert statement
+assert missing_as_blank_cols != zeroes_as_blank_cols
 
 fixed_rows = []
 fixed_rows.append(header)  # keep header
@@ -48,11 +55,14 @@ for row in r2[1:]:
     for i in missing_as_blank_cols:
         if row[i] == "0":
             row[i] = ""
+    for i in zeroes_as_blank_cols:
+        if row[i] == "":
+            row[i] = "0"
     fixed_rows.append(row)
 
 # write out the new second file
-with open(f'{dir}/{output}/{output}_clean_metadata.tsv', "w", newline="") as out:
+with open(f'{dir}/{id}/{id}_clean_metadata.tsv', "w", newline="") as out:
     w = csv.writer(out, delimiter="\t")
     w.writerows(fixed_rows)
 
-print("Wrote corrected file to", output)
+print("Wrote corrected file to", f'{id}_clean_metadata.tsv')
