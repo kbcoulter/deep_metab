@@ -7,3 +7,4 @@
 *.pickle
 *.pkl
 *_checkpoints_*
+*.vscode

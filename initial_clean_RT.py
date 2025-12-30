@@ -16,8 +16,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--option",
     type=int,  
-    required=True,
+    required=False,
     help="Options for format of output files: 1) simple format for Graphormer-RT processing, or 2) complicated format for reference.",
+    default = 1
 )
 
 parser.add_argument(
