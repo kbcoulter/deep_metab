@@ -311,6 +311,18 @@
     
     These all exist at: /shared/REAL_DATA/RAW_DATA/HILIC/
     
+    ############################
+    ### TRANSFER LEARN HILIC ###
+    ############################
+
+    ! fine-tune only head to avoid overfitting
+
+    batch-size = 16 → steps_per_epoch = ceil(200/16) = 13
+    max-epoch = 50 → total-num-update = 13 × 50 = 650
+    warmup-updates = 10
+    lr = 5e-5
+    set --freeze-level to freeze encoder (e.g., --freeze-level 1 or 2 depending on implementation)
+
     #################
     ### DEV NOTES ###
     #################
