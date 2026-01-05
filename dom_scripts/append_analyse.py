@@ -24,6 +24,7 @@ def get_args():
                         choices=['hilic', 'rp'], required=True)
     parser.add_argument('-s', '--stats', action="store_true", help="Option to perform analysis and print out stats")
     parser.add_argument("--save", action="store_true", help="Choose to save output or not.")
+    parser.add_argument("--ids", action="store_true", help="Output two dataframes: one with ambiguous ids and one with unambiguous ids.")
 
     return parser.parse_args()
 
@@ -38,6 +39,7 @@ data_type = args.type
 append_switch = args.append
 stats_switch = args.stats
 save_switch = args.save
+id_switch = args.ids
 
 # before analysis
 ambiguous_count_0 = 0
@@ -46,6 +48,9 @@ unambiguous_count_0 = 0
 ambiguous_count_1 = 0
 unambiguous_count_1 = 0
 
+# track ambiguous mass feature ids
+total_ambiguous_ids = set()
+total_unambiguous_ids = set()
 # set up the dictionary if containing a predictions csv file
 if smiles_csv != None:
     try:
@@ -102,6 +107,11 @@ try:
             # retrieve ids
             unambiguous_ids = set(single_occurrence_ids) | set(ids_with_111)
             ambiguous_ids = set(id_counts[id_counts > 1].index) - set(ids_with_111)
+
+            # add to the global set counter
+            total_unambiguous_ids.add(unambiguous_ids)
+            total_ambiguous_ids.add(ambiguous_ids)
+
             # print(len(ambiguous_ids))
             # print(ids_with_111)
             unambiguous_count_1 += len(unambiguous_ids)
@@ -110,7 +120,9 @@ try:
         #print(f'Closing File: {file_path}')
         # save appended df to a new csv
         #break # break early
-        if save_switch:
+        if save_switch and id_switch:
+            df_csv
+        elif save_switch:
             df_csv.to_csv(f'{file}_appended.csv')
 
     # Write the Report
@@ -127,6 +139,7 @@ try:
 
         # Aditional Feature Track Which Ids Are Ambiguous and Print Out their details
         # output a csv file with ambiguous the ids
+        
 
         with open(f'{data_type}_stats_report.txt', 'w') as fout:
             fout.write(f"Before Applying Graphormer_RT:\n\
