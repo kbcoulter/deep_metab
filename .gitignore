@@ -7,3 +7,7 @@
 *.pickle
 *.pkl
 *_checkpoints_*
+
+
+# ignore sample data
+*emp_500_RP_data
