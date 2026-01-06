@@ -12,7 +12,7 @@
 #SBATCH --output=evaluate_HILIC_%j.out.log
 #SBATCH --error=evaluate_HILIC_%j.err.log
 
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/sample_data_0001"
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_Pretraining"
 # SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
 
 #PREDS_DIR="predictions_RP"
@@ -23,12 +23,12 @@ CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -qu
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
 
 apptainer exec --nv \
-    --bind ./graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
-    graphormercontainer.sif bash -c "
+    --bind ../graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
+    ../graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
     export HILIC_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"
     export HILIC_METADATA_PATH=\"${CONTAINER_METADATA_FILE}\"
-    cd ./Graphormer-RT/graphormer/evaluate/ && \
+    cd ../Graphormer-RT/graphormer/evaluate/ && \
     python evaluate_HILIC.py \
         --user-dir ../../graphormer \
         --num-workers 32 \
