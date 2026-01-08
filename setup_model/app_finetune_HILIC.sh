@@ -11,22 +11,23 @@
 #SBATCH --output=tlearn_HILIC_%j.out.log
 #SBATCH --error=tlearn_HILIC_%j.err.log
 
+echo "Starting HILIC finetuning..."
 apptainer exec --nv \
   --bind ../Graphormer-RT:/workspace/Graphormer-RT \
   --bind ../graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
   --bind ../my_data/HILIC_ft:/workspace/Graphormer-RT/my_data/HILIC_ft \
   ../graphormercontainer.sif bash -lc "
 source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt
-export PYTHONPATH=/workspace/Graphormer-RT:\$PYTHONPATH
+export PYTHONPATH=/workspace/Graphormer-RT/graphormer/modules:$PYTHONPATH
 cd /workspace/Graphormer-RT
 CUDA_VISIBLE_DEVICES=0 fairseq-train \
-  --user-dir . \
+  --user-dir graphormer \
   --batch-size 64 \
   --num-workers 20 \
-  --ddp-backend=legacy_ddp \
+  --ddp-backend legacy_ddp \
   --seed 23 \
   --user-data-dir my_data/HILIC_ft \
-  --dataset-name DM_Finetune_train.csv \
+  --dataset-name DM_Finetune \
   --task graph_prediction_with_flag \
   --criterion rmse_HILIC \
   --arch graphormer_HILIC \

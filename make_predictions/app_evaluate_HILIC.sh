@@ -1,5 +1,5 @@
 #!/bin/bash
-### NOTE: RUN THIS FROM deep_metab
+### NOTE: RUN THIS FROM deep_metab DIR
 
 #SBATCH --account=bgmp
 #SBATCH --partition=gpu
@@ -12,18 +12,15 @@
 #SBATCH --output=evaluate_HILIC_%j.out.log
 #SBATCH --error=evaluate_HILIC_%j.err.log
 
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_Pretraining"
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_Pretraining/"
 # SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
-
-#PREDS_DIR="predictions_RP"
-#mkdir -p "$PREDS_DIR"
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
 CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
-
 apptainer exec --nv \
     --bind ../graphormer_checkpoints_HILIC:/workspace/Graphormer-RT/checkpoints_HILIC \
+    --bind ${HOST_DATA_DIR}:/data \
     ../graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
     export HILIC_DATA_FILE_PATH=\"${CONTAINER_DATA_FILE}\"

@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='Split HILIC "Known" Data (.csv) in
 parser.add_argument('-d',"--data", type=str, required=True, help="Input data.csv file to be split, where each row is an entry.")
 # Cut default path from /projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_knowns to save confusion
 parser.add_argument('-r', "--rseed", type=int, required=False, default=26, help="Random seed to maintain reproducibility. Defaults to 26.")
-parser.add_argument('-s', '--split', type = float, required = False, default = 0.1, help = "Proportion to split training and test data. Defautls to 0.1.")
+parser.add_argument('-s', '--split', type = float, required = False, default = 0.5, help = "Proportion to split training and test data. Defaults to 0.5 (50-50).")
 parser.add_argument('-o', '--out', type = str, required = False, default = None, help = "A prefix for train and test data out: <out>_test.csv")
 
 args = parser.parse_args()

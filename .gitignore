@@ -8,3 +8,5 @@
 *.pkl
 *_checkpoints_*
 *.vscode
+*__pycache__
+*my_data

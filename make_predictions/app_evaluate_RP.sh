@@ -12,16 +12,12 @@
 #SBATCH --output=evaluate_RP_%j.out.log
 #SBATCH --error=evaluate_RP_%j.err.log
 
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/sample_data_0001"
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/sample_data_0001"
 # SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
-
-#PREDS_DIR="predictions_RP"
-#mkdir -p "$PREDS_DIR"
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
 CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
-
 apptainer exec --nv \
     --bind ./graphormer_checkpoints_RP:/workspace/Graphormer-RT/checkpoints_RP \
     --bind ${HOST_DATA_DIR}:/data \

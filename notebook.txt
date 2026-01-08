@@ -19,11 +19,14 @@
         DOCKER IMAGE: https://hub.docker.com/r/dnhem/proj_deepmetab # NEEDS UPDATE
         ZENODO LINKS: https://zenodo.org/records/15021743
 
+        Add Personal ZENODO Links...
+
     ####################
     ### DOCKER SETUP ###
     ####################
 
         Numpy version 1.23.5 not 1.23.0 -> Update docker to version 0.3 and include
+        fairseq version: 0.10.2 -> conda install fairseq==0.10.2
 
     ##################
     ### ALL SETUP ####
@@ -62,200 +65,200 @@
     ### EVALUATE PERSONAL DATA ###
     ##############################
 
-    9/16/25 - Ethan
-    Preliminary: We found a script Gen_Col_Dict that input a folder containing all chromotagraphic information
-    by sample ID as well as an hsmb and tanaka databse and turns that into a dictionary.
+        9/16/25 - Ethan
+        Preliminary: We found a script Gen_Col_Dict that input a folder containing all chromotagraphic information
+        by sample ID as well as an hsmb and tanaka databse and turns that into a dictionary.
 
-    My goal was to clean the script (remove unnecessary code), import argparses so we can call the function,
-    and reformat/add input files so we could run the script. 
+        My goal was to clean the script (remove unnecessary code), import argparses so we can call the function,
+        and reformat/add input files so we could run the script. 
 
-    References: 
-    [1] https://github.com/michaelwitting/RepoRT/tree/master/processed_data --> The data repository the original script hardcodes. I used this as reference for my data. More information for how this is structured and gets inputted in my updated Gen_Col_Dict_updated.py script.
-    [2] https://github.com/michaelwitting/RepoRT/blob/master/example/0259_metadata.tsv --> The metadata I formatted my original metadata.tsv file around. 
-    [3] https://github.com/michaelwitting/RepoRT/tree/master/resources --> Where I found hsm and tanaka databases and used them in the script.
-    [4] https://github.com/biocore/emp/blob/master/protocols/MetabolomicsLC.md#mass-spectrometry-analysis-non-targeted-lc-msms --> Chromatographic information for our sample data I used for creating input data.
-    [5] https://community.agilent.com/technical/consumables/w/wiki/2710/calculating-column-volume --> Calculator used to calculate deadvolume
-
-
-    ***Step 1: Removing unnecessary code***
-    * I removed plot_grads and any associated code with it as it was never used, and only used to plot information 
-    * I removed rt_data and all associated code with it, because no information from rt_data ever gets sent to the output dictionary.
-        * The only 2 variables rt_data intializes are n_rts & t_rts which represent the number of retention times in our RT data, and those are only used for print statements. 
-    
-    ***Step 2: Import argparses***
-    Below is a summary of where each value in the dictionary came from in the input files:
-    ________________________________________________________________________________________________________________________________________________
-    1. company_name: [METADATA] (Derived from column_name by splitting the string)
-    2. usp_code: [METADATA]
-    3. col_length: [METADATA]
-    4. col_innerdiam: [METADATA]
-    5. col_part_size: [METADATA]
-    6. temp: [METADATA]
-    7. col_fl: [GRADIENT] (This is the flow rate, fl[0])
-    8. col_dead: [METADATA] (This is the dead time)
-    9. HPLC_type: [INFO] (From info_data[1,2])
-    10. A_solv: [METADATA] (Derived from the A_mobile section)
-    11. B_solv: [METADATA] (Derived from the B_mobile section)
+        References: 
+        [1] https://github.com/michaelwitting/RepoRT/tree/master/processed_data --> The data repository the original script hardcodes. I used this as reference for my data. More information for how this is structured and gets inputted in my updated Gen_Col_Dict_updated.py script.
+        [2] https://github.com/michaelwitting/RepoRT/blob/master/example/0259_metadata.tsv --> The metadata I formatted my original metadata.tsv file around. 
+        [3] https://github.com/michaelwitting/RepoRT/tree/master/resources --> Where I found hsm and tanaka databases and used them in the script.
+        [4] https://github.com/biocore/emp/blob/master/protocols/MetabolomicsLC.md#mass-spectrometry-analysis-non-targeted-lc-msms --> Chromatographic information for our sample data I used for creating input data.
+        [5] https://community.agilent.com/technical/consumables/w/wiki/2710/calculating-column-volume --> Calculator used to calculate deadvolume
 
 
-    Gradient Inflection Points (Items 12-19)
-
-    These 8 values come from the grad_l list, which is calculated by the get_inflections function using the pB (%B) and times columns from the [GRADIENT] file.
-    1. time1: [GRADIENT]
-    2. grad1: [GRADIENT]
-    3. time2: [GRADIENT]
-    4. grad2: [GRADIENT]
-    5. time3: [GRADIENT]
-    6. grad3: [GRADIENT]
-    7. time4: [GRADIENT]
-    8. grad4: [GRADIENT]
-
-
-    pH & Solvent Percentages (Items 20-25)
-
-    These are all pulled directly from the [METADATA] file.
-    1. A_pH: [METADATA]
-    2. B_pH: [METADATA]
-    3. A_start: [METADATA]
-    4. A_end: [METADATA]
-    5. B_start: [METADATA]
-    6. B_end: [METADATA]
-
-
-    Eluent A Additives (Items 26-55)
-
-    These 30 values are pulled as a single row (A_add[1]) from the [METADATA] file.
-    1. eluent.A.formic: [METADATA]
-    2. eluent.A.formic.unit: [METADATA]
-    3. eluent.A.acetic: [METADATA]
-    4. eluent.A.acetic.unit: [METADATA]
-    5. eluent.A.trifluoroacetic: [METADATA]
-    6. eluent.A.trifluoroacetic.unit: [METADATA]
-    7. eluent.A.phosphor: [METADATA]
-    8. eluent.A.phosphor.unit: [METADATA]
-    9. eluent.A.nh4ac: [METADATA]
-    10. eluent.A.nh4ac.unit: [METADATA]
-    11. eluent.A.nh4form: [METADATA]
-    12. eluent.A.nh4form.unit: [METADATA]
-    13. eluent.A.nh4carb: [METADATA]
-    14. eluent.A.nh4carb.unit: [METADATA]
-    15. eluent.A.nh4bicarb: [METADATA]
-    16. eluent.A.nh4bicarb.unit: [METADATA]
-    17. eluent.A.nh4f: [METADATA]
-    18. eluent.A.nh4f.unit: [METADATA]
-    19. eluent.A.nh4oh: [METADATA]
-    20. eluent.A.nh4oh.unit: [METADATA]
-    21. eluent.A.trieth: [METADATA]
-    22. eluent.A.trieth.unit: [METADATA]
-    23. eluent.A.triprop: [METADATA]
-    24. eluent.A.triprop.unit: [METADATA]
-    25. eluent.A.tribut: [METADATA]
-    26. eluent.A.tribut.unit: [METADATA]
-    27. eluent.A.nndimethylhex: [METADATA]
-    28. eluent.A.nndimethylhex.unit: [METADATA]
-    29. eluent.A.medronic: [METADATA]
-    30. eluent.A.medronic.unit: [METADATA]
-
-
-    Eluent B Additives (Items 56-85)
-
-    These 30 values are pulled as a single row (B_add[1]) from the [METADATA] file.
-    1. eluent.B.formic: [METADATA]
-    2. eluent.B.formic.unit: [METADATA]
-    3. eluent.B.acetic: [METADATA]
-    4. eluent.B.acetic.unit: [METADATA]
-    5. eluent.B.trifluoroacetic: [METADATA]
-    6. eluent.B.trifluoroacetic.unit: [METADATA]
-    7. eluent.B.phosphor: [METADATA]
-    8. eluent.B.phosphor.unit: [METADATA]
-    9. eluent.B.nh4ac: [METADATA]
-    10. eluent.B.nh4ac.unit: [METADATA]
-    11. eluent.B.nh4form: [METADATA]
-    12. eluent.B.nh4form.unit: [METADATA]
-    13. eluent.B.nh4carb: [METADATA]
-    14. eluent.B.nh4carb.unit: [METADATA]
-    15. eluent.B.nh4bicarb: [METADATA]
-    16. eluent.B.nh4bicarb.unit: [METADATA]
-    17. eluent.B.nh4f: [METADATA]
-    18. eluent.B.nh4f.unit: [METADATA]
-    19. eluent.B.nh4oh: [METADATA]
-    20. eluent.B.nh4oh.unit: [METADATA]
-    21. eluent.B.trieth: [METADATA]
-    22. eluent.B.trieth.unit: [METADATA]
-    23. eluent.B.triprop: [METADATA]
-    24. eluent.B.triprop.unit: [METADATA]
-    25. eluent.B.tribut: [METADATA]
-    26. eluent.B.tribut.unit: [METADATA]
-    27. eluent.B.nndimethylhex: [METADATA]
-    28. eluent.B.nndimethylhex.unit: [METADATA]
-    29. eluent.B.medronic: [METADATA]
-    30. eluent.B.medronic.unit: [METADATA]
-
-
-    Tanaka Column Parameters (Items 86-93)
-
-    These 8 values are from [TANAKA_DB].
-    * How they are found: The script uses the column_name (from [METADATA]) as a key to search the tanaka_dict (which was loaded from [TANAKA_DB]). If no match is found, it fills in 8 zeros.
-    1. kPB: [TANAKA_DB]
-    2. αCH2: [TANAKA_DB]
-    3. αT/O: [TANAKA_DB]
-    4. αC/P: [TANAKA_DB]
-    5. αB/P: [TANAKA_DB]
-    6. αB/P.1: [TANAKA_DB]
-    7. particle size: [TANAKA_DB]
-    8. pore size: [TANAKA_DB]
-
-
-    HSMB Column Parameters (Items 94-100)
-
-    These 7 values are from [HSMB_DB].
-    * How they are found: The script uses the column_name (from [METADATA]) as a key to search the hsmb_dict (which was loaded from [HSMB_DB]). If no match is found, it fills in 7 zeros.
-    1. H: [HSMB_DB]
-    2. S*: [HSMB_DB]
-    3. A: [HSMB_DB]
-    4. B: [HSMB_DB]
-    5. C (pH 2.8): [HSMB_DB]
-    6. C (pH 7.0): [HSMB_DB]
-    7. EB retention factor: [HSMB_DB]
-    _____________________________________________________________________________________________________________________________________________________________________________________
-    
-    Therefore, we need 5 files as input: hsmb, tanaka, metadata, gradient, and info.
-    These files are specified in argparse, along with how metadata is structured.
-    The output, consistent with the original script, is a dictionary where each key is a different experiment (sampleID), and the values are the 100 chromatographic data parameters listed above in the summary.
-
-    ***Step 3: Bugfixing and reformatting data so it works***
-    This was the most tiresome part of this process. In this section, for better explanation, I will refer to the repos I referenced by their index.
-    
-    The first bug I noticed was that [2] has a single column less than [1]. I found out that this column is 'column.t0', which I assumed was dead time. I looked online and found that dead time = dead volume / flow rate,
-    therefore I used [5] with 'column.length', ''column.id', and 'column.flowrate' in metadata.tsv and got a column void volume of .228 mL. Then dividing by column.flowrate = 0.5, I got .456. 
-    In the new file, I added column.t0 and .456 respectively. 
-
-    The second bug I noticed was this line kept complaining in Gen_Col_Dict: 
-    B_ind = np.argmax(np.asarray(B_mobile[1:,:], dtype=float))
-    Tracing it back, it pretty much complained that 'eluent.A.heptafluorobutyric.unit' was blank. This was really strange because [1] has blanks in the same places I had blanks, so I had no idea how they got their script to run on those files.
-    The first thing I tried was changing the blank to an 'NA'. However, then that line complained that it was a string because of the 'dtype=float' arg.
-    So then I tried making exception to that line by having it skip any strings, therefore there wouldn't be a data type conversion error, and the script worked.
-    But then, the model complained about my dictionary with the following error:
-    ValueError: could not convert string to float: 'NA'
-    I looked at their dictionary and it didn't have any NAs, and nothing in the code seemed to actually do anything with those NAs, so I said screw it and changed all NA values to 0. With that said, I'm not absolutely CERTAIN that changing to 0 magically fixes everything with no adverse effects on the model.
-    
-    Finally, I coded gradient.tsv using the info from [4], specifically the line "Chromatographic elution method was set as follows: 0.00-1.00 min, isocratic 5% B; 1.00-9.00 min, gradient from 5% to 100% B; 9.00-11.00 min, isocratic 100% B".
-    I also pulled tanaka and hsmb from [3].
-
-    ***Conclusion:***
-    An updated Gen_Col_Dict script named 'Gen_Col_Dict_updated.py'.
-        Usage: 
-        ./Gen_Col_Dict_updated.py -i processed_data --tanaka tanaka_database.tsv --hsmb hsmb_database.tsv -o metadata.pickle
+        ***Step 1: Removing unnecessary code***
+        * I removed plot_grads and any associated code with it as it was never used, and only used to plot information 
+        * I removed rt_data and all associated code with it, because no information from rt_data ever gets sent to the output dictionary.
+            * The only 2 variables rt_data intializes are n_rts & t_rts which represent the number of retention times in our RT data, and those are only used for print statements. 
         
-        NOTE: This usage assumes these files are in your current pwd, you might have to adjust it if your working from somewhere else. You'll also need the neccessary packages it imports.
+        ***Step 2: Import argparses***
+        Below is a summary of where each value in the dictionary came from in the input files:
+        ________________________________________________________________________________________________________________________________________________
+        1. company_name: [METADATA] (Derived from column_name by splitting the string)
+        2. usp_code: [METADATA]
+        3. col_length: [METADATA]
+        4. col_innerdiam: [METADATA]
+        5. col_part_size: [METADATA]
+        6. temp: [METADATA]
+        7. col_fl: [GRADIENT] (This is the flow rate, fl[0])
+        8. col_dead: [METADATA] (This is the dead time)
+        9. HPLC_type: [INFO] (From info_data[1,2])
+        10. A_solv: [METADATA] (Derived from the A_mobile section)
+        11. B_solv: [METADATA] (Derived from the B_mobile section)
 
-        After generating metadata.pickle, I still haven't changed app_evaluate_RP.sh to work for multiple samples so you'll have to either copy or move that file into sample_data_0001 so that it could be read. 
 
-    A script named 'pickle_to_csv.py'. Its purpose is to take any pickle file and output a csv. I used this when doing a final check on my pickle file that was generated, and to analyze the dictionary they fed the model.
-        Usage:
-        ./pickle_to_csv.py -o metadata.tsv -i metadata.pickle 
+        Gradient Inflection Points (Items 12-19)
 
-        NOTE: Same with Gen_Col_Dict updated, this usage assumes these files are in your current pwd.
+        These 8 values come from the grad_l list, which is calculated by the get_inflections function using the pB (%B) and times columns from the [GRADIENT] file.
+        1. time1: [GRADIENT]
+        2. grad1: [GRADIENT]
+        3. time2: [GRADIENT]
+        4. grad2: [GRADIENT]
+        5. time3: [GRADIENT]
+        6. grad3: [GRADIENT]
+        7. time4: [GRADIENT]
+        8. grad4: [GRADIENT]
+
+
+        pH & Solvent Percentages (Items 20-25)
+
+        These are all pulled directly from the [METADATA] file.
+        1. A_pH: [METADATA]
+        2. B_pH: [METADATA]
+        3. A_start: [METADATA]
+        4. A_end: [METADATA]
+        5. B_start: [METADATA]
+        6. B_end: [METADATA]
+
+
+        Eluent A Additives (Items 26-55)
+
+        These 30 values are pulled as a single row (A_add[1]) from the [METADATA] file.
+        1. eluent.A.formic: [METADATA]
+        2. eluent.A.formic.unit: [METADATA]
+        3. eluent.A.acetic: [METADATA]
+        4. eluent.A.acetic.unit: [METADATA]
+        5. eluent.A.trifluoroacetic: [METADATA]
+        6. eluent.A.trifluoroacetic.unit: [METADATA]
+        7. eluent.A.phosphor: [METADATA]
+        8. eluent.A.phosphor.unit: [METADATA]
+        9. eluent.A.nh4ac: [METADATA]
+        10. eluent.A.nh4ac.unit: [METADATA]
+        11. eluent.A.nh4form: [METADATA]
+        12. eluent.A.nh4form.unit: [METADATA]
+        13. eluent.A.nh4carb: [METADATA]
+        14. eluent.A.nh4carb.unit: [METADATA]
+        15. eluent.A.nh4bicarb: [METADATA]
+        16. eluent.A.nh4bicarb.unit: [METADATA]
+        17. eluent.A.nh4f: [METADATA]
+        18. eluent.A.nh4f.unit: [METADATA]
+        19. eluent.A.nh4oh: [METADATA]
+        20. eluent.A.nh4oh.unit: [METADATA]
+        21. eluent.A.trieth: [METADATA]
+        22. eluent.A.trieth.unit: [METADATA]
+        23. eluent.A.triprop: [METADATA]
+        24. eluent.A.triprop.unit: [METADATA]
+        25. eluent.A.tribut: [METADATA]
+        26. eluent.A.tribut.unit: [METADATA]
+        27. eluent.A.nndimethylhex: [METADATA]
+        28. eluent.A.nndimethylhex.unit: [METADATA]
+        29. eluent.A.medronic: [METADATA]
+        30. eluent.A.medronic.unit: [METADATA]
+
+
+        Eluent B Additives (Items 56-85)
+
+        These 30 values are pulled as a single row (B_add[1]) from the [METADATA] file.
+        1. eluent.B.formic: [METADATA]
+        2. eluent.B.formic.unit: [METADATA]
+        3. eluent.B.acetic: [METADATA]
+        4. eluent.B.acetic.unit: [METADATA]
+        5. eluent.B.trifluoroacetic: [METADATA]
+        6. eluent.B.trifluoroacetic.unit: [METADATA]
+        7. eluent.B.phosphor: [METADATA]
+        8. eluent.B.phosphor.unit: [METADATA]
+        9. eluent.B.nh4ac: [METADATA]
+        10. eluent.B.nh4ac.unit: [METADATA]
+        11. eluent.B.nh4form: [METADATA]
+        12. eluent.B.nh4form.unit: [METADATA]
+        13. eluent.B.nh4carb: [METADATA]
+        14. eluent.B.nh4carb.unit: [METADATA]
+        15. eluent.B.nh4bicarb: [METADATA]
+        16. eluent.B.nh4bicarb.unit: [METADATA]
+        17. eluent.B.nh4f: [METADATA]
+        18. eluent.B.nh4f.unit: [METADATA]
+        19. eluent.B.nh4oh: [METADATA]
+        20. eluent.B.nh4oh.unit: [METADATA]
+        21. eluent.B.trieth: [METADATA]
+        22. eluent.B.trieth.unit: [METADATA]
+        23. eluent.B.triprop: [METADATA]
+        24. eluent.B.triprop.unit: [METADATA]
+        25. eluent.B.tribut: [METADATA]
+        26. eluent.B.tribut.unit: [METADATA]
+        27. eluent.B.nndimethylhex: [METADATA]
+        28. eluent.B.nndimethylhex.unit: [METADATA]
+        29. eluent.B.medronic: [METADATA]
+        30. eluent.B.medronic.unit: [METADATA]
+
+
+        Tanaka Column Parameters (Items 86-93)
+
+        These 8 values are from [TANAKA_DB].
+        * How they are found: The script uses the column_name (from [METADATA]) as a key to search the tanaka_dict (which was loaded from [TANAKA_DB]). If no match is found, it fills in 8 zeros.
+        1. kPB: [TANAKA_DB]
+        2. αCH2: [TANAKA_DB]
+        3. αT/O: [TANAKA_DB]
+        4. αC/P: [TANAKA_DB]
+        5. αB/P: [TANAKA_DB]
+        6. αB/P.1: [TANAKA_DB]
+        7. particle size: [TANAKA_DB]
+        8. pore size: [TANAKA_DB]
+
+
+        HSMB Column Parameters (Items 94-100)
+
+        These 7 values are from [HSMB_DB].
+        * How they are found: The script uses the column_name (from [METADATA]) as a key to search the hsmb_dict (which was loaded from [HSMB_DB]). If no match is found, it fills in 7 zeros.
+        1. H: [HSMB_DB]
+        2. S*: [HSMB_DB]
+        3. A: [HSMB_DB]
+        4. B: [HSMB_DB]
+        5. C (pH 2.8): [HSMB_DB]
+        6. C (pH 7.0): [HSMB_DB]
+        7. EB retention factor: [HSMB_DB]
+        _____________________________________________________________________________________________________________________________________________________________________________________
+        
+        Therefore, we need 5 files as input: hsmb, tanaka, metadata, gradient, and info.
+        These files are specified in argparse, along with how metadata is structured.
+        The output, consistent with the original script, is a dictionary where each key is a different experiment (sampleID), and the values are the 100 chromatographic data parameters listed above in the summary.
+
+        ***Step 3: Bugfixing and reformatting data so it works***
+        This was the most tiresome part of this process. In this section, for better explanation, I will refer to the repos I referenced by their index.
+        
+        The first bug I noticed was that [2] has a single column less than [1]. I found out that this column is 'column.t0', which I assumed was dead time. I looked online and found that dead time = dead volume / flow rate,
+        therefore I used [5] with 'column.length', ''column.id', and 'column.flowrate' in metadata.tsv and got a column void volume of .228 mL. Then dividing by column.flowrate = 0.5, I got .456. 
+        In the new file, I added column.t0 and .456 respectively. 
+
+        The second bug I noticed was this line kept complaining in Gen_Col_Dict: 
+        B_ind = np.argmax(np.asarray(B_mobile[1:,:], dtype=float))
+        Tracing it back, it pretty much complained that 'eluent.A.heptafluorobutyric.unit' was blank. This was really strange because [1] has blanks in the same places I had blanks, so I had no idea how they got their script to run on those files.
+        The first thing I tried was changing the blank to an 'NA'. However, then that line complained that it was a string because of the 'dtype=float' arg.
+        So then I tried making exception to that line by having it skip any strings, therefore there wouldn't be a data type conversion error, and the script worked.
+        But then, the model complained about my dictionary with the following error:
+        ValueError: could not convert string to float: 'NA'
+        I looked at their dictionary and it didn't have any NAs, and nothing in the code seemed to actually do anything with those NAs, so I said screw it and changed all NA values to 0. With that said, I'm not absolutely CERTAIN that changing to 0 magically fixes everything with no adverse effects on the model.
+        
+        Finally, I coded gradient.tsv using the info from [4], specifically the line "Chromatographic elution method was set as follows: 0.00-1.00 min, isocratic 5% B; 1.00-9.00 min, gradient from 5% to 100% B; 9.00-11.00 min, isocratic 100% B".
+        I also pulled tanaka and hsmb from [3].
+
+        ***Conclusion:***
+        An updated Gen_Col_Dict script named 'Gen_Col_Dict_updated.py'.
+            Usage: 
+            ./Gen_Col_Dict_updated.py -i processed_data --tanaka tanaka_database.tsv --hsmb hsmb_database.tsv -o metadata.pickle
+            
+            NOTE: This usage assumes these files are in your current pwd, you might have to adjust it if your working from somewhere else. You'll also need the neccessary packages it imports.
+
+            After generating metadata.pickle, I still haven't changed app_evaluate_RP.sh to work for multiple samples so you'll have to either copy or move that file into sample_data_0001 so that it could be read. 
+
+        A script named 'pickle_to_csv.py'. Its purpose is to take any pickle file and output a csv. I used this when doing a final check on my pickle file that was generated, and to analyze the dictionary they fed the model.
+            Usage:
+            ./pickle_to_csv.py -o metadata.tsv -i metadata.pickle 
+
+            NOTE: Same with Gen_Col_Dict updated, this usage assumes these files are in your current pwd.
 
     ###########################
     ### HILIC SETUP CHANGES ###
@@ -289,58 +292,59 @@
     ##############################################
     ### META-DATA DICT PICKLE FIX AND REFORMAT ###
     ##############################################
-    In branch `dom_meta_fix`:
+        In branch `dom_meta_fix`:
 
-    `dom_gen_pickle_dict.py`  uses argparse now. Required arguments are processed `data_directory` and an `output` directory. Optional arguments like `output_file` , `tanaka` and `hsmb` are given default arguments. `tanaka` and `hsmb` argument are inputted from our shared dir (`/projects/bgmp/shared/groups/2025/deepmetab/shared/`). The processed `data_directory` should contain directories of multiple chromatography setup ids. Inside each id dir, we should expect gradient.tsv, info.tsv and metadata.tsv. Since Katherine told us that we only needed one setup for all  the different samples she's giving us, we don't have to worry about manually creating those files since they all use the same setup.
-    
-    `dom_gen_pickle_dict.py` will reformat the metadata.tsv that is expected from each of the chromatography setup dir in processed `data_directory` to follow the same convention as the authors. Takes in an `template` file that should be from the authors, an `input` file that should be reformatted, an `output` file of the reformatted version and an output `dir` to specify where you want to store it.
+        `dom_gen_pickle_dict.py`  uses argparse now. Required arguments are processed `data_directory` and an `output` directory. Optional arguments like `output_file` , `tanaka` and `hsmb` are given default arguments. `tanaka` and `hsmb` argument are inputted from our shared dir (`/projects/bgmp/shared/groups/2025/deepmetab/shared/`). The processed `data_directory` should contain directories of multiple chromatography setup ids. Inside each id dir, we should expect gradient.tsv, info.tsv and metadata.tsv. Since Katherine told us that we only needed one setup for all  the different samples she's giving us, we don't have to worry about manually creating those files since they all use the same setup.
+        
+        `dom_gen_pickle_dict.py` will reformat the metadata.tsv that is expected from each of the chromatography setup dir in processed `data_directory` to follow the same convention as the authors. Takes in an `template` file that should be from the authors, an `input` file that should be reformatted, an `output` file of the reformatted version and an output `dir` to specify where you want to store it.
 
     ##############################
     ### HILIC KNOWN EVAL NOTES ###
     ##############################
 
-    JGI_HILIC_knowns sheets are broken down into:
-        LD.csv -> the left data or the first sheets
-        RD.csv -> the right data or the second key sheets
+        JGI_HILIC_knowns sheets are broken down into:
+            LD.csv -> the left data or the first sheets
+            RD.csv -> the right data or the second key sheets
 
-    To Join these scripts, assuming the name holds, run Join_Hilic_Ichikey.Rmd
-        OUTPUT: HILIC_KNOWNS.csv
-    
-    Then, to process data as a model input, please run ./initial_clean_RT.sh with specified model inputs
-        OUTPUT: OUTPUT_KNOWNS_INPUT.tsv
-    
-    These all exist at: /shared/REAL_DATA/RAW_DATA/HILIC/
+        To Join these scripts, assuming the name holds, run Join_Hilic_Ichikey.Rmd
+            OUTPUT: HILIC_KNOWNS.csv
+        
+        Then, to process data as a model input, please run ./initial_clean_RT.sh with specified model inputs
+            OUTPUT: OUTPUT_KNOWNS_INPUT.tsv
+        
+        These all exist at: /shared/REAL_DATA/RAW_DATA/HILIC/
     
     ############################
     ### TRANSFER LEARN HILIC ###
     ############################
 
-    ! fine-tune only head to avoid overfitting
+        ! fine-tune only head to avoid overfitting
 
-    batch-size = 16 → steps_per_epoch = ceil(200/16) = 13
-    max-epoch = 50 → total-num-update = 13 × 50 = 650
-    warmup-updates = 10
-    lr = 5e-5
-    set --freeze-level to freeze encoder (e.g., --freeze-level 1 or 2 depending on implementation)
+        batch-size = 16 → steps_per_epoch = ceil(200/16) = 13
+        max-epoch = 50 → total-num-update = 13 × 50 = 650
+        warmup-updates = 10
+        lr = 5e-5
+        set --freeze-level to freeze encoder (e.g., --freeze-level 1 or 2 depending on implementation)
+
+        !!! These changes were not committed. The original values were setup to finetune.
 
     #################
     ### DEV NOTES ###
     #################
 
-    Function calls - Ethan:
-    ./analyze_predictions.py -i /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/predictions_RP/40199700.csv 
-    ./initial_clean_RT.py --option 1 --sampleID 0001 --input_file /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/raw_data/0001_sample_rt_raw.csv --output_file sample_rt_clean.tsv
+        Function calls - Ethan:
+        ./analyze_predictions.py -i /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/predictions_RP/40199700.csv 
+        ./initial_clean_RT.py --option 1 --sampleID 0001 --input_file /projects/bgmp/shared/groups/2025/deepmetab/ewi/deep_metab/raw_data/0001_sample_rt_raw.csv --output_file sample_rt_clean.tsv
 
-    # training_loss.py script needs to be fixed -> Inefficient Loop -> kcoulter
+        # training_loss.py script needs to be fixed -> Inefficient Loop -> kcoulter
 
-    ??? where did evaluate_ex_apptainer.sh go ???
-        Did I lose this -> Not a big deal, just curious how a file got lost.
+        ??? where did evaluate_ex_apptainer.sh go ???
+            Did I lose this -> Not a big deal, just curious how a file got lost.
 
-    Need to raise issue on OG graphormer-RT repo for the evaluate scripts. 
-    Need to raise issue on OG graphormer-RT repo for the changes Dom made in the formatting script. <- DOM
-
-    Need to edit app_evaluate_* to run from relative paths so users require no changes. 
-    Need to edit app_evaluate_* to take one option, which is data directory 
-    Need to move scrips into thier own directories to organize. 
-    Need to edit the data formatting script to the correct .csv .tsv extensions
-    Need to organize notebook by tab indenting so that the file is easy to nav. 
+        Need to raise issue on OG graphormer-RT repo for the evaluate scripts. 
+        Need to raise issue on OG graphormer-RT repo for the changes Dom made in the formatting script. <- DOM
+        Need to edit app_evaluate_* to run from relative paths so users require no changes. <- DONE KC
+        Need to edit app_evaluate_* to take one option, which is data directory
+        Need to move scrips into thier own directories to organize. <- DONE Ewi KC
+        Need to edit the data formatting script to the correct .csv .tsv extensions
+        Need to organize notebook by tab indenting so that the file is easy to nav. 
