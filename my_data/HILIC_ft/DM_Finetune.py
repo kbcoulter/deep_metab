@@ -5,11 +5,11 @@ import csv
 from rdkit import Chem
 import torch
 import time
-
+import inspect
 
 from .featurizing_helpers import *
 #print("YOURE DEF IN THE RCORRECT FILE")
-print("Youre in RP_loader_train.py, the WRONG file")
+print("DM_Finetune.py accessed. This is ONLY expected during finetuning. Continuing...")
 
 import itertools
 
@@ -30,6 +30,7 @@ USPs = ['', 'L1', 'L10', 'L109', 'L11', 'L43', 'L68', 'L3','L114', 'L112', 'L122
 solvs = ['h2o','meoh', 'acn', 'Other']
 HPLC_type = ['RP', 'HILIC', 'Other']
 lengths = ['0','50', '100','150', '200', '250', 'Other']
+
 
 def one_hot_lengths(length):
     one_hot = [0] * len(lengths)
@@ -82,6 +83,7 @@ def featurize_column(column_params, index):
     temp = float(column_params[5]) / 100 ## normalizing temperature (rethink this maybe)
     fl = float(column_params[6])  ## Double check that fl and col_fl are two different values
     dead = float(column_params[7]) ## dead time - MAYBE REMOVE COLUMN THAT HAS DEAD TIME OF ZERO
+    # HPLC_type = one_hot_HPLC_type(column_params[8])
 
     solv_A = one_hot_solvent(column_params[9])
     solv_B = one_hot_solvent(column_params[10])
@@ -121,47 +123,37 @@ def featurize_column(column_params, index):
     hsmb_params = column_params[92:]
     hsmb_params = [0 if param == '' else float(param) for param in hsmb_params] ## TODO: add these in
 
-    ##TODO: normalize tanaka params somehow
-    ## COARSE NORMALIZATION BASED ON VALUES - coarse normalization didn't help
+
     kPB = tanaka_params[1] # / 10     
     a_CH2 = tanaka_params[2]# / 2
     a_TO = tanaka_params[3]# / 5
     a_CP = tanaka_params[4]
     a_BP = tanaka_params[5] #/ 2 
     a_BP1 = tanaka_params[6] #/ 2
-    # particle_size = tanaka_params[7] #/ 5
     
     tanaka_params = [kPB, a_CH2, a_TO, a_CP, a_BP, a_BP1, part_size]
-    # tanaka_params = [param +1 for param in tanaka_params]
 
-    add_A_vals = np.ceil(list(map(float, add_A[::2])))
-    add_B_vals = np.ceil(list(map(float, add_B[::2])))
-
-
-    ## get rid of this to recover values. 
-    add_A_vals = np.where(add_A_vals != 0, 1, add_A_vals)
-    add_B_vals = np.where(add_B_vals != 0, 1, add_B_vals)
+    add_A_vals = np.ceil(list(map(float, add_A[::2]))) 
+    add_B_vals = np.ceil(list(map(float, add_B[::2]))) 
 
 
     add_A_units = add_A[1::2]
     add_B_units = add_B[1::2]
 
-
     float_encodings = [diameter, part_size, start_B, t1, B1, t2, B2, t3, B3, pH_A, pH_B, dead, temp, fl, length] 
 
     float_encodings += tanaka_params
     float_encodings += hsmb_params
-
     int_encodings = np.concatenate([[-2],company, USP, solv_A, solv_B, add_A_vals, add_B_vals])
 
     features = np.concatenate((int_encodings, float_encodings))
 
     return features
 
-
 class IRSpectraD(DGLDataset):
     def __init__(self):
         self.mode = ":("
+
         ## atom encodings
         atom_type_onehot = [
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -242,7 +234,7 @@ class IRSpectraD(DGLDataset):
                     for x3 in hybridization_onehot:
                         for x4 in is_aromatic_onehot:
                             for x5 in total_num_H_onehot: 
-                                for x6 in explicit_valence_onehot:
+                                for x6 in explicit_valence_oesnehot:
                                     for x7 in total_bonds_onehot:
                                         key = torch.cat([torch.Tensor(y) for y in [x1, x2, x3, x4, x5, x6, x7]])
                                         self.one_hotatom_to_int_keys += [key]
@@ -304,7 +296,7 @@ class IRSpectraD(DGLDataset):
             count +=1
 
         self.num_classes = 1801
-        super().__init__(name='IR Spectra', ) 
+        self.process()
 
     def process(self):
         
@@ -312,15 +304,118 @@ class IRSpectraD(DGLDataset):
         self.labels = []
         self.smiles = []
 
-        print("I'm in the right file")
-        print("RP_LOADER_TRAIN.PY is BEING CALLED")
+        ### NEW ##########################
+        print("HILIC_test.py is BEING CALLED")
+        print("---------------------------------------------------------------")
+        print("--- Call Path Backtrace (from earliest call to most recent) ---")
 
+        stack = inspect.stack()
+    
+        # We reverse the stack and skip the current frame (which is last after reversal)
+        for frame_info in reversed(stack[1:]):
+            # frame_info is a named tuple.
+            # frame_info.filename: Path to the file
+            # frame_info.lineno: Line number in the file
+            # frame_info.function: Name of the function
+            
+            # Use os.path.basename to just get the filename, not the full path
+            filename = os.path.basename(frame_info.filename)
+            
+            print(f"  -> File: '{filename}', Line: {frame_info.lineno}, Function: {frame_info.function}")
+            
+        print("---------------------------------------------------------------")
+
+        data_file_path = os.getenv('HILIC_DATA_FILE_PATH')
+        metadata_file_path = os.getenv('HILIC_METADATA_PATH')
+
+        if data_file_path is None:
+            data_file_path = '/sample_data/Finetune_0185_HILIC.csv' # <-- Use the container path
+            print(f"WARNING: HILIC_DATA_FILE_PATH not set. Defaulting to {data_file_path}")
+        
+        if metadata_file_path is None:
+            metadata_file_path = '/sample_data/HILIC_metadata.pickle' # <-- Use the container path
+            print(f"WARNING: HILIC_METADATA_PATH not set. Defaulting to {metadata_file_path}")
+
+        x = import_data(data_file_path)
+        metadata_path = str(metadata_file_path)
+
+        # --- Start of Added Debugging ---
+        print(f"[DEBUG] --- Attempting to load data from: {data_file_path}")
+        x = import_data(data_file_path)
+        if x is not None:
+            try:
+                data_len = len(x)
+                print(f"[DEBUG] Data loaded successfully. Type: {type(x)}. Number of rows: {data_len}")
+                if data_len > 0:
+                    # Print first 10 elements of the first row, or fewer if row is shorter
+                    print(f"[DEBUG] First row of data (sample): {x[0][:10]}")
+                else:
+                    print("[DEBUG] Data file loaded, but it's empty.")
+            except TypeError:
+                print(f"[DEBUG] Data loaded, but its type ({type(x)}) doesn't support len().")
+        else:
+            print("[DEBUG] ERROR: Failed to load data. import_data returned None.")
+
+        print(f"[DEBUG] --- Attempting to load metadata from: {metadata_file_path}")
+        print(f"[DEBUG] Type of metadata_file_path variable: {type(metadata_file_path)}")
+        metadata_path = str(metadata_file_path)
+        print(f"[DEBUG] metadata_path variable (after str()): {metadata_path}")
+        print(f"[DEBUG] Type of metadata_path variable: {type(metadata_path)}")
+        # --- End of Added Debugging ---
+
+        print(f"--- Loading data from: {x}")
+        print(f"--- Loading metadata from: {metadata_path}")
+
+        print("---------------------------------------------------------------")
 
         # x = import_data(r'../../../sample_data/Pretrain_RP_sample.csv') ## sample pretrain
-        x = import_data(r'../../sample_data/finetune_0003_RP.csv') ## sample finetune
+        #x = import_data(r'../../sample_data/finetune_0003_RP.csv') ## sample finetune
         # x = import_data(r'../../../sample_data/HUAN.csv') ## sample finetune
 
-        metadata_path = '../../sample_data/RP_metadata.pickle'
+        #metadata_path = '../../sample_data/RP_metadata.pickle'
+
+        print(f"[DEBUG] Opening metadata file: {metadata_path}")
+        try:
+            with open(metadata_path, 'rb') as handle: 
+                self.columndict = pickle.load(handle) 
+            print(f"[DEBUG] Metadata loaded successfully. Type: {type(self.columndict)}.")
+            
+            if isinstance(self.columndict, dict):
+                print(f"[DEBUG] Metadata is a dict with {len(self.columndict)} keys.")
+                # try:
+                #     first_key = next(iter(self.columndict))
+                #     print(f"[DEBUG] First key in metadata dict: {first_key}")
+                #     # Print first 10 elements of the value, or fewer if value is shorter
+                #     print(f"[DEBUG] Value for first key (sample): {self.columndict[first_key][:10]}")
+                # except StopIteration:
+                #     print("[DEBUG] Metadata dictionary is empty.")
+                if self.columndict:
+                    print("[DEBUG] Contents overview:")
+                    for key, value in self.columndict.items():
+                        # Get a printable representation of the value's size
+                        try:
+                            size_repr = f", Length: {len(value)}"
+                        except TypeError:
+                            size_repr = "" # Value is not iterable or doesn't support len()
+                        
+                        # Print the key, the type of the value, and its size/length
+                        print(f"[DEBUG]   Key: '{key}', Value Type: {type(value).__name__}{size_repr}")
+                        print(f"Content: {value}")
+                else:
+                    print("[DEBUG] Metadata dictionary is empty.")
+            else:
+                print(f"[DEBUG] Warning: Metadata loaded but is not a dictionary (type: {type(self.columndict)}).")
+        
+        except FileNotFoundError:
+            print(f"[DEBUG] ERROR: Metadata file not found at {metadata_path}")
+            return # Can't proceed without metadata
+        except Exception as e:
+            print(f"[DEBUG] ERROR: Failed to load or read metadata pickle: {e}")
+            return # Can't proceed
+        print("---------------------------------------------------------------")
+        
+        # with open(metadata_path, 'rb') as handle: 
+        #     self.columndict = pickle.load(handle) 
         with open(metadata_path, 'rb') as handle: 
             self.columndict = pickle.load(handle) 
 
@@ -333,28 +428,22 @@ class IRSpectraD(DGLDataset):
             index_dict[key] = j
 
         gnode = True ## Turns off global node
+        ### NEW ##########################
+
+
         count = 0
- 
         for i in tqdm(x):
-        
-            sm = str(i[1]).replace("Q", "#") ## Hashtags break some of our preprocessing scripts so we replace them with Qs to make life easier 
+            sm = str(i[1]).replace("Q", "#") ##
+
             mol = Chem.MolFromSmiles(sm)
-            rt = torch.tensor([float(i[2])]) / 1000  #  Models were pretrained dividing by 1000 (more stable)
-            ## but finetuning was more stable with non-1000 division. To do zero-shot evaluation, ensure your RTs (mins)
-            ## are divided by zero (and modify the correspoding function in the evaluation )
+            rt = torch.tensor([float(i[2])])  ## normalizing retention time
+            # print(rt)
             index = i[0]
 
             col_meta = self.columndict[index]
-            
-            col_ind = index_dict[index]
 
             column_params = featurize_column(col_meta, index)
-            ablate_info = False
-            if ablate_info: 
-                column_params = np.zeros_like(column_params)
-                column_params[0] = col_ind
 
-            # global_feat = np.concatenate((column_params, descriptors))
 
             num_atoms = mol.GetNumAtoms()
             add_self_loop = False
@@ -376,7 +465,7 @@ class IRSpectraD(DGLDataset):
 
             features_gnode = False ## if you want a second global node
 
-
+            gnode = True
             if gnode:
                 src_list = list(np.full(num_atoms, num_atoms)) ## node pairs describing edges in heteograph - see DGL documentation
                 dst_list = list(np.arange(num_atoms))
@@ -414,10 +503,15 @@ class IRSpectraD(DGLDataset):
 
             self.graphs.append(g)
             self.labels.append(rt)
+            # print(rt)
+            if torch.isnan(rt):
+                print(rt)
+                exit()
             self.smiles.append((sm, index))
             count+=1
             # gc.collect()
-
+            # if count == 1000:
+            #     break
 
     def __getitem__(self, i):
         # print(i)
@@ -426,17 +520,19 @@ class IRSpectraD(DGLDataset):
     def __len__(self):
         return len(self.graphs)
 
-@register_dataset("RT_test")
+@register_dataset("DM_Finetune")
 def create_customized_dataset():
 
     dataset = IRSpectraD()
     num_graphs = len(dataset)
 
+    train_split = 0.8
+    train_size = int(num_graphs * train_split)
 
     return {
         "dataset": dataset,
-        "train_idx":  np.arange(0, num_graphs),#rand_train_idx,#np.arange(0, 4),#
-        "valid_idx": None, #np.arange(int(num_graphs * train), int(num_graphs * (train + val))),#np.arange(4,10), #
-        "test_idx": None, #
+        "train_idx": np.arange(0, train_size),           # First 68 samples for training
+        "valid_idx": np.arange(train_size, num_graphs),  # Last 17 samples for validation
+        "test_idx": None,
         "source": "dgl" 
     }

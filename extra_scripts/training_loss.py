@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 ### BODY ###
 ############
 
-log_file = "../metab_39574192.out.log" ## CHANGE THIS TO AN ARGPARSE SO I CAN RUN THIS EVERYTIME WE TRAIN ! 
+log_file = "../setup_model/tlearn_HILIC_41262880.out.log" ## CHANGE THIS TO AN ARGPARSE SO I CAN RUN THIS EVERYTIME WE TRAIN ! 
 
 train_stats = {}
 valid_stats = {}

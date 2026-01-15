@@ -9,4 +9,8 @@
 *_checkpoints_*
 *.vscode
 *__pycache__
-*my_data
+*my_data/HILIC_knowns
+*my_data/HILIC_Pretraining
+*my_data/HILIC_Posttraining
+*my_data/sample_data_0001
+*.pyc
