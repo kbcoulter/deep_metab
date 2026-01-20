@@ -12,7 +12,7 @@ Liquid chromatography–mass spectrometry (LC‑MS) enables metabolite identific
 
 Recent deep‑learning models, like **[Graphormer‑RT](https://github.com/HopkinsLaboratory/Graphormer-RT)**, can predict retention times dependent on specific LC–MS configurations, offering a path to improved annotation workflows.
 
-This repository provides a full pipeline for applying modern deep learning to LC–MS Hydrophilic Interaction Liquid Chromatography (HILIC) and Reverse Phase (RP)data to improve annotation.
+This repository provides a full pipeline for applying modern deep learning to LC–MS Hydrophilic Interaction Liquid Chromatography (HILIC) and Reverse Phase (RP) data to improve annotation.
 
 
 ## Quick Links:
@@ -29,14 +29,13 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **LC–MS Preprocessing** | Tools to clean, format, and structure LC–MS datasets for prediction |
 | **Data Loaders** | Scripts to load, featurize, and register data  |
 | **Workflow Setup** | Setup directory, container, etc. for RP/HILIC/Both RT prediction and annotation  |
-| **Model Training** | Train Graphormer‑RT from scratch for a chosen LC–MS configuration (RP) |
+| **Model Training** | Train Graphormer‑RT from scratch (RP) |
 | **Model Finetuning** | Finetune Graphormer‑RT models (HILIC transfer learning and HILIC finetuning) |
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |
 | **Quality Control** | Automatically flag potentially mis‑annotated mass feature IDs |
 | **Stereoisomer Flagging** | Identify and label stereoisomers mass feature IDs|
 | **LazyPredict ✨** | Run **entire** automated workflow|
-
 
 
 

@@ -1,4 +1,4 @@
-
+### THIS SCRIPT IS FOR LOADING DATA TO FINETUNE HILIC ###
 from re import L
 import numpy as np 
 import csv

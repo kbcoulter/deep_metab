@@ -8,11 +8,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
-#SBATCH --constraint=gpu-10gb
+###SBATCH --constraint=gpu-10gb
 #SBATCH --output=evaluate_HILIC_%j.out.log
 #SBATCH --error=evaluate_HILIC_%j.err.log
 
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_Pretraining/"
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/my_data/HILIC_Posttraining/"
 # SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
