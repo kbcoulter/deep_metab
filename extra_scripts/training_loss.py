@@ -2,15 +2,11 @@
 # Generates a .png plot to visualize model training and validation loss by epoch
 # NOTE: THIS SCRIPT NEEDS REVISION. SEE BELOW
 
-###############
 ### IMPORTS ###
-###############
 import pandas as pd
 import matplotlib.pyplot as plt
 
-############
 ### BODY ###
-############
 
 log_file = "../setup_model/tlearn_HILIC_41338567.out.log" ## CHANGE THIS TO AN ARGPARSE SO I CAN RUN THIS EVERYTIME WE TRAIN ! 
 
@@ -47,9 +43,8 @@ df = pd.DataFrame({
     "Train_Loss": [train_stats[e] for e in epochs],
     "Valid_Loss": [valid_stats[e] for e in epochs]})
 
-##############
+
 ### FIGURE ###
-##############
 plt.plot(df['Epoch'], df['Train_Loss'], color='tomato', label='Training Loss')
 plt.plot(df['Epoch'], df['Valid_Loss'], color='dodgerblue', label='Validation Loss')
 plt.xlabel("Epoch", fontsize="x-large")

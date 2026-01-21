@@ -1,5 +1,9 @@
 #!/bin/bash
 
+VERSION=v0.1
+IMAGE=dnhem/proj_deepmetab
+HWEIGHTS=https://zenodo.org/records/15021743/files/99.pt?download=1
+
 echo "Beginning Setup for HILIC."
 
 cd ..
@@ -7,11 +11,12 @@ cd ..
 git submodule init
 git submodule update
 
-apptainer build graphormercontainer.sif docker://dnhem/proj_deepmetab:v0.1 ### NOTE VERSION
+echo "Building Apptainer image from ${IMAGE}:${VERSION}"
+apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION}
 
 mkdir -p graphormer_checkpoints_HILIC
-wget -O graphormer_checkpoints_HILIC/99.pt "https://zenodo.org/records/15021743/files/99.pt?download=1" ### EDIT FOR SMALLER
+wget -O graphormer_checkpoints_HILIC/HILIC_WEIGHTS.pt "${HWEIGHTS}"
 
 mkdir -p predictions_HILIC
 
-echo "Setup Completed Successfully!"
+echo "HILIC Setup Completed Successfully!"

@@ -14,6 +14,17 @@ Recent deep‑learning models, like **[Graphormer‑RT](https://github.com/Hopki
 
 This repository provides a full pipeline for applying modern deep learning to LC–MS Hydrophilic Interaction Liquid Chromatography (HILIC) and Reverse Phase (RP) data to improve annotation.
 
+## Table of Contents:
+- [Background](#background)
+- [Quick Links](#quick-links)
+- [Features](#features)
+- [HowTo (Manuals)](#how-to)
+- [Warnings](#warning)
+- [Common Issues](#common-issues)
+- [**References**](documentation/references.md)
+- [Contact](#contact-or-contribute)
+- [License](LICENSE)
+
 
 ## Quick Links:
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
@@ -47,7 +58,7 @@ Choose the instructions based on your system permissions:
 
 | Environment | Workflow Type | Documentation | Status |
 |-------------|---------------|---------------|--------|
-| **HPC / No Root Access** | Step-by-Step | [Manual Guide]() | ✅ |
+| **HPC / No Root Access** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
 | **HPC / No Root Access** | Automated | LazyPredict | 🚧 |
 | **Local Machine / Root Access Available** | Step-by-Step | Root Manual Guide| 🚧 |
 | **Local Machine / Root Access Available** | Automated | Root LazyPredict | 🚧 |
@@ -56,7 +67,7 @@ Choose the instructions based on your system permissions:
 #### Support for non HPC machines is in development and is expected soon...
 ---
 
-## Warning:
+## Warnings:
 
 
 > **DO NOT MOVE `.sif` FILES**  
@@ -70,16 +81,23 @@ my_data/HILIC_ft/
 workspace/Graphormer-RT/my_data/HILIC_ft/
 ```
 
+> **Writing over Weights:**
+> Finetuning HILIC will write over ```best_checkpoint.pt``` and ```last_checkpoint.pt``` should they exist in ```graphormer_checkpoints_HILIC/```.** 
+
 ## Common Issues:
-* Fairseq Errors: Please ensure that you are using the Docker provided. The original [Graphormer](https://github.com/microsoft/Graphormer) was built on a Snapshot Release of [fairseq](https://github.com/facebookresearch/fairseq). This version is not available via conda/mamba. 
+* Fairseq Errors: Please ensure that you are using the Docker provided. The original [Graphormer](https://github.com/microsoft/Graphormer) was built on a Snapshot Release of [fairseq](https://github.com/facebookresearch/fairseq). This version is not available via conda/mamba. If error persists, please ensure that contianer version instillation matches the most recent available on [Docker](https://hub.docker.com/r/dnhem/proj_deepmetab).
+
+* Python Package Issues: Please first ensure that you are using the Docker provided. Reference previous fairseq issue for guidance. 
+ 
+* **If your issue is not shown above, please [raise an issue](https://github.com/kbcoulter/deep_metab/issues/new).**
+
 
 
 ## References
 
-#### **Please access our references [here]()**
+#### **Please access our references [here](documentation/references.md)**
 
-Special thanks to the Graphormer‑RT development team and to Maxine Wren and the BGMP instructional team for their mentorship. This work benefited from access to the University of Oregon HPC cluster, Talapas.
-
+Special thanks to the Graphormer‑RT development team and to Maxine Wren and the BGMP instructional team for their mentorship. This work benefited from access to the University of Oregon HPC cluster, [Talapas](https://uoracs.github.io/talapas2-knowledge-base/).
 
 
 ## Contact or Contribute
@@ -91,7 +109,6 @@ If you have questions, feedback, or ideas, feel free to reach out to any of us:
 - ewi [at] uoregon [dot] edu  
 
 ---
-
 ### We welcome (and encourage) contributions!
 
 If you find this project helpful or interesting, please consider **starring the repository**. Your support helps motivate continued development and improvements 🙂

@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
-### SBATCH --constraint=gpu-10gb
+#SBATCH --constraint=gpu-10gb
 #SBATCH --output=tlearn_HILIC_%j.out.log
 #SBATCH --error=tlearn_HILIC_%j.err.log
 
