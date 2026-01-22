@@ -1,0 +1,11 @@
+Before RT filtering / scoring:
+  Ambiguous:   37303 (56.45%)
+  Unambiguous: 28779 (43.55%)
+
+After RT filtering + scoring:
+  Ambiguous:   22613 (34.22%)
+  Unambiguous: 40424 (61.17%)
+
+Changes:
+  Δ Ambiguous:   -14690 | % change: -39.38%
+  Δ Unambiguous: 11645 | % change: 40.46%

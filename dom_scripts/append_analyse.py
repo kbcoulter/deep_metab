@@ -25,7 +25,7 @@ def get_args():
     parser.add_argument('-s', '--stats', action="store_true", help="Option to perform analysis and print out stats")
     parser.add_argument("--save", action="store_true", help="Choose to save output or not.")
     parser.add_argument("--ids", action="store_true", help="Output two dataframes: one with ambiguous ids and one with unambiguous ids.")
-
+    
     return parser.parse_args()
 
 # Set up global variables
@@ -120,10 +120,10 @@ try:
         #print(f'Closing File: {file_path}')
         # save appended df to a new csv
         #break # break early
-        if save_switch and id_switch:
-            df_csv
-        elif save_switch:
-            df_csv.to_csv(f'{file}_appended.csv')
+        # if save_switch and id_switch:
+        #     df_csv
+        # elif save_switch:
+        #     df_csv.to_csv(f'{file}_appended.csv')
 
     # Write the Report
     if stats_switch:
