@@ -46,6 +46,14 @@ def get_args():
 
 
 def load_smiles_dict(smiles_csv: str | None) -> dict | None:
+    """
+    Prepare a dictionary from a loaded smiles csv file.
+    
+    :param smiles_csv: A CSV file containing UNIQUE smiles and their Predicted Rentention Time.
+    :type smiles_csv: str | None
+    :return: A dictionary with smiles as key and their predicted rt as values.
+    :rtype: dict[Any, Any] | None
+    """
     if smiles_csv is None:
         return None
     smiles_df = pd.read_csv(smiles_csv)
@@ -53,13 +61,26 @@ def load_smiles_dict(smiles_csv: str | None) -> dict | None:
         raise KeyError("Preds CSV must contain columns: 'SMILES' and 'Predicted RT'")
     return smiles_df.set_index("SMILES")["Predicted RT"].to_dict()
 
-
+# add in the predicted smiles value to the data
 def load_and_prepare(file_path: str, append_switch: bool, smiles_dict: dict | None) -> pd.DataFrame:
+    """
+    Docstring for load_and_prepare
+    
+    :param file_path: Description
+    :type file_path: str
+    :param append_switch: Description
+    :type append_switch: bool
+    :param smiles_dict: Description
+    :type smiles_dict: dict | None
+    :return: Description
+    :rtype: DataFrame
+    """
     df = pd.read_csv(file_path)
 
     if "smiles" not in df.columns:
         raise KeyError(f"'smiles' column not found in {file_path}")
 
+    # remove rows that doesnt contain smiles
     df = df.dropna(subset=["smiles"]).copy()
 
     if append_switch:
@@ -74,6 +95,14 @@ def load_and_prepare(file_path: str, append_switch: bool, smiles_dict: dict | No
 
 
 def add_rt_diffs(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Docstring for add_rt_diffs
+    
+    :param df: Description
+    :type df: pd.DataFrame
+    :return: Description
+    :rtype: DataFrame
+    """
     df = df.copy()
     rt_obs_sec = df["Retention Time (min)"] * 60.0
     rt_pred_sec = df["predicted_rt"]
@@ -81,18 +110,28 @@ def add_rt_diffs(df: pd.DataFrame) -> pd.DataFrame:
     df["abs_diff_rt"] = df["diff_rt"].abs()
     return df
 
-
+# get the initial hits of unambiguous
 def get_initial_unambig_delta(df: pd.DataFrame) -> np.ndarray:
+    """
+    Docstring for get_initial_unambig_delta
+    
+    :param df: Description
+    :type df: pd.DataFrame
+    :return: Description
+    :rtype: ndarray[Any, Any]
+    """
     counts = df["Mass Feature ID"].value_counts()
     single_ids = counts[counts == 1].index
     calib = df[df["Mass Feature ID"].isin(single_ids)]
     return calib["diff_rt"].dropna().to_numpy()
 
+# remove stereoisomers from the data
 def remove_stereoisomers(df : pd.DataFrame):
     df = df.copy()
     df = df[df["is_stereo"] != True]
     return df
 
+# flag the metabolites
 def apply_rt_filter(df: pd.DataFrame, mu: float, sigma: float, k: float) -> pd.DataFrame:
     if not np.isfinite(sigma) or sigma <= 0:
         return df
@@ -112,12 +151,18 @@ def main(args) -> int:
     smiles_dict = load_smiles_dict(args.preds)
 
     # state (kept local, no globals)
-    ambiguous_count_0 = 0
+    # post filter/ before scoring
+    ambiguous_count_0 = 0 
     unambiguous_count_0 = 0
+    # post filter/ scoring
     ambiguous_count_1 = 0
     unambiguous_count_1 = 0
+    # filter status
+    ambiguous_count_before_filter = 0
+    unambiguous_count_before_filter = 0
     rt_pass_count = 0
     rt_fail_count = 0
+
     total_ambiguous_ids = set()
     total_unambiguous_ids = set()
 
@@ -132,7 +177,7 @@ def main(args) -> int:
     # Drop Stereos
     stereo_df = pd.read_csv(args.stereo_file)
 
-    # ---- Pass 1: calibration (optional) ----
+    # ---- Pass 1: calibration  ----
     global_mu, global_sigma = None, None
     knowns_path = args.knowns
     knowns_smiles = args.knowns_preds
@@ -195,14 +240,14 @@ def main(args) -> int:
                     }))
 
         # Consolidate
-        all_delta = np.concatenate(all_delta) if all_delta else np.array([])
+        all_delta = np.concatenate(all_delta) if all_delta else np.array([]) # empty if nth
         delta_df = (
             pd.concat(all_delta_records, ignore_index=True)
             if all_delta_records
             else pd.DataFrame(columns=["delta_rt_sec", "abs_delta_rt_sec", "chrom_type", "source"])
         )
 
-        # Export dist
+        # Export distribution
         if args.save and not delta_df.empty:
             out_name = f"{data_type}_rt_delta_calibration.csv"
             delta_df.to_csv(out_name, index=False)
@@ -244,18 +289,25 @@ def main(args) -> int:
 
                 counts_a_stereo += df_csv["Mass Feature ID"].nunique()
 
+            # add the rt differences
             df_csv = add_rt_diffs(df_csv)
+
+            # get initial counts before applying the filtering
+            # BEFORE scoring counts
+            before_filter_counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo
+            ambiguous_count_before_filter += int((before_filter_counts > 1).sum())
+            unambiguous_count_before_filter += int((before_filter_counts == 1).sum())
 
             # RT filter (if enabled)
             if rt_filter_enabled and global_mu is not None and global_sigma is not None:
-                n_before = len(df_csv)
+                n_before = len(df_csv) # len before filter
                 df_csv = apply_rt_filter(df_csv, global_mu, global_sigma, args.k_std)
-                n_after = len(df_csv)
+                n_after = len(df_csv) # len after filter
                 rt_pass_count += n_after
                 rt_fail_count += (n_before - n_after)
 
             # BEFORE scoring counts
-            counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo
+            counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo OR filter
             # sanity check on NaNs values if exist
             ambiguous_count_0 += int((counts > 1).sum())
             unambiguous_count_0 += int((counts == 1).sum())
@@ -291,6 +343,10 @@ def main(args) -> int:
         print(f"  Fraction removed: {frac:.3f}")
 
     if args.stats:
+        total_counts_bf = ambiguous_count_before_filter + unambiguous_count_before_filter
+        pct_amb_bf = round(ambiguous_count_before_filter*100/total_counts_bf, 2)
+        pct_umb_bf = round(unambiguous_count_before_filter*100/total_counts_bf, 2)
+
         total_counts = ambiguous_count_0 + unambiguous_count_0
         pct_amb0 = round(ambiguous_count_0 * 100 / total_counts, 2) if total_counts else 0
         pct_un0 = round(unambiguous_count_0 * 100 / total_counts, 2) if total_counts else 0
@@ -301,6 +357,10 @@ def main(args) -> int:
         diff_un = unambiguous_count_1 - unambiguous_count_0
 
         report = f"""Before RT filtering / scoring:
+Ambiguous:   {ambiguous_count_before_filter} ({pct_amb_bf}%)
+Unambiguous: {unambiguous_count_before_filter} ({pct_umb_bf}%)
+
+After RT filtering:
 Ambiguous:   {ambiguous_count_0} ({pct_amb0}%)
 Unambiguous: {unambiguous_count_0} ({pct_un0}%)
 
@@ -316,10 +376,11 @@ Changes:
             pct_destereo = round(counts_a_stereo * 100 / counts_w_stereo, 2)
             pct_stere = round((counts_w_stereo - counts_a_stereo) * 100 / counts_w_stereo, 2)
             stereo_rpt = f"""Destereo Summary:
-    Before Destereoisomerizing: {counts_w_stereo}
-    Ambiguous Due to Stereoisomers: {counts_w_stereo - counts_a_stereo} MF IDs ({pct_stere}%)
-    Number of Destereo: {counts_a_stereo} MF IDS ({pct_destereo}%)\n"""
-        
+Before Destereoisomerizing: {counts_w_stereo}
+Ambiguous Due to Stereoisomers: {counts_w_stereo - counts_a_stereo} MF IDs ({pct_stere}%)
+Number of Destereo: {counts_a_stereo} MF IDS ({pct_destereo}%)
+"""
+
             report = stereo_rpt + report
         out = f"{data_type}_stats_report.txt"
         out_dir = f'{data_type}_Calibration_&_Scoring'
