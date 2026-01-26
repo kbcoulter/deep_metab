@@ -10,7 +10,7 @@ def main():
         description='Process dataset CSV to create averaged input for graphormer-RT.',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
-This script processes the output from initiate_dataset.py and creates input for graphormer-RT.
+This script processes the output from initiate_dataset.py (or rm_stereochemistry.py if you choose to remove stereoisomers) and creates input for graphormer-RT.
 
 For metabolites that appear more than once (unknown metabolites appearing across multiple datasets),
 this script averages their retention times. The output contains only one copy of each unique metabolite,
@@ -30,12 +30,25 @@ Example:
                         help='Output CSV file name for graphormer-RT input')
     parser.add_argument('--setup_id', '-s', type=str, required=True,
                         help='Setup ID for graphormer-RT to reference')
+    parser.add_argument('--file_name_col', type=int, default=0,
+                        help='Column index for file name (default: 0)')
+    parser.add_argument('--retention_time_col', type=int, default=2,
+                        help='Column index for retention time (default: 2)')
+    parser.add_argument('--smiles_col', type=int, default=3,
+                        help='Column index for SMILES (default: 3)')
     
     args = parser.parse_args()
     
     input_file_path = args.input_file_name
     output_file_path = args.output_file_name
     setup_id = args.setup_id
+    file_name_col = args.file_name_col
+    retention_time_col = args.retention_time_col
+    smiles_col = args.smiles_col
+    
+    # Validate column indices are non-negative
+    if file_name_col < 0 or retention_time_col < 0 or smiles_col < 0:
+        raise ValueError("Column indices must be non-negative")
     
     averaged_smiles = {}
     
@@ -43,10 +56,19 @@ Example:
         reader = csv.reader(infile)
         next(reader)  # Skip header line
         
-        for row in reader:
-            file_name = row[0]        # File Name
-            retention_time = float(row[2])  # Retention Time (min)
-            smiles = row[3]           # smiles
+        for row_num, row in enumerate(reader, start=2):  # start=2 because we skipped header (row 1)
+            # Check if column indices are valid
+            if len(row) <= max(file_name_col, retention_time_col, smiles_col):
+                raise IndexError(
+                    f"Row {row_num} has insufficient columns. "
+                    f"Required indices: file_name={file_name_col}, "
+                    f"retention_time={retention_time_col}, smiles={smiles_col}, "
+                    f"but row only has {len(row)} columns"
+                )
+            
+            file_name = row[file_name_col]        # File Name
+            retention_time = float(row[retention_time_col])  # Retention Time (min)
+            smiles = row[smiles_col]           # smiles
             
             # Accumulate retention times and counts for averaging
             if smiles in averaged_smiles:
