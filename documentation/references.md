@@ -27,3 +27,5 @@ Ott, M., Edunov, S., Baevski, A., Fan, A., Gross, S., Ng, N., Grangier, D., & Au
 Shi, Y., Zheng, S., Ke, G., Shen, Y., You, J., He, J., Luo, S., Liu, C., He, D., & Liu, T.-Y. (2023). Benchmarking Graphormer on Large-Scale Molecular Modeling Datasets (No. arXiv:2203.04810). arXiv. https://doi.org/10.48550/arXiv.2203.04810
 
 RDKit. Rdkit/Rdkit. HTML. May 12, 2013, Released January 28, 2026. https://github.com/rdkit/rdkit.
+
+Bogart, S. (n.d.). SankeyMATIC [Computer software]. https://sankeymatic.com/
