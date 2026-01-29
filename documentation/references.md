@@ -16,6 +16,8 @@ Stienstra, C. M. K., Nazdrajić, E., & Hopkins, W. S. (2025). From Reverse Phase
 
 Ansel, J., Yang, E., He, H., Gimelshein, N., Jain, A., Voznesensky, M., Bao, B., Bell, P., Berard, D., Burovski, E., Chauhan, G., Chourdia, A., Constable, W., Desmaison, A., DeVito, Z., Ellison, E., Feng, W., Gong, J., Gschwind, M., … Chintala, S. (2024). PyTorch 2: Faster Machine Learning Through Dynamic Python Bytecode Transformation and Graph Compilation. Proceedings of the 29th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 2, 929–947. https://doi.org/10.1145/3620665.3640366
 
+Bogart, S. (n.d.). SankeyMATIC [Computer software]. https://sankeymatic.com/
+
 Eloe-Fadrosh, E. A., Ahmed, F., Anubhav, Babinski, M., Baumes, J., Borkum, M., Bramer, L., Canon, S., Christianson, D. S., Corilo, Y. E., Davenport, K. W., Davis, B., Drake, M., Duncan, W. D., Flynn, M. C., Hays, D., Hu, B., Huntemann, M., Kelliher, J., … Fagnan, K. (2022). The National Microbiome Data Collaborative Data Portal: An integrated multi-omics microbiome data resource. Nucleic Acids Research, 50(D1), D828–D836. https://doi.org/10.1093/nar/gkab990
 
 Kretschmer, F., Harrieder, E.-M., Hoffmann, M. A., Böcker, S., & Witting, M. (2024). RepoRT: A comprehensive repository for small molecule retention times. Nature Methods, 21(2), 153–155. https://doi.org/10.1038/s41592-023-02143-z
@@ -27,5 +29,3 @@ Ott, M., Edunov, S., Baevski, A., Fan, A., Gross, S., Ng, N., Grangier, D., & Au
 Shi, Y., Zheng, S., Ke, G., Shen, Y., You, J., He, J., Luo, S., Liu, C., He, D., & Liu, T.-Y. (2023). Benchmarking Graphormer on Large-Scale Molecular Modeling Datasets (No. arXiv:2203.04810). arXiv. https://doi.org/10.48550/arXiv.2203.04810
 
 RDKit. Rdkit/Rdkit. HTML. May 12, 2013, Released January 28, 2026. https://github.com/rdkit/rdkit.
-
-Bogart, S. (n.d.). SankeyMATIC [Computer software]. https://sankeymatic.com/
