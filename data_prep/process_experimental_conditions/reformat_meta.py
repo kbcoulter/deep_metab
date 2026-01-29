@@ -20,7 +20,7 @@ template = args.template
 input = args.input
 dir = args.dir
 id = args.id
-
+# updated
 with open(template, newline="") as f1, open(input, newline="") as f2:
     r1 = list(csv.reader(f1, delimiter="\t"))
     r2 = list(csv.reader(f2, delimiter="\t"))

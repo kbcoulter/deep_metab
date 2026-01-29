@@ -34,7 +34,7 @@ args = get_args()
 path = args.data_directory
 output = args.output
 output_file = args.output_file
-
+#updated
 def get_inflections(pB, times):
     max_ind = np.argmax(pB) ## this is used to stop before the max value (basically ignore points after the gradient resets)
     slopes = []

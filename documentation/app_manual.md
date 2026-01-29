@@ -92,15 +92,7 @@ Prepare a single CSV in Graphormer-RT format (`setup_id,smiles,averaged_retentio
   --smiles_col "smiles"
 ```
 
-**2. (Optional) Remove stereochemistry** from the SMILES column. If you do this, use the output as input to step 3 and set `--smiles_col` to the 0-based index of the destereoed SMILES column (e.g. `4` if `smiles_destereo` is the 5th column).
-
-```bash
-./data_prep/process_lcms_data/rm_stereochemistry.py \
-  -i <aggregated.csv> -o <aggregated_destereo.csv> \
-  --smiles-col-index 3 --has-header
-```
-
-**3. Build Graphormer-RT input** (average RT per unique SMILES, add setup ID):
+**2. Build Graphormer-RT input** (average RT per unique SMILES, add setup ID):
 
 ```bash
 ./data_prep/process_lcms_data/initiate_input_for_graphormer_eval.py \
@@ -108,7 +100,7 @@ Prepare a single CSV in Graphormer-RT format (`setup_id,smiles,averaged_retentio
   -s <setup_id>
 ```
 
-Use the output from step 2 as `-i` if you ran the optional destereo step. Use `--file_name_col`, `--retention_time_col`, and `--smiles_col` if your column positions differ (defaults 0, 2, 3). Place `graphormer_input.csv` and your metadata pickle together in e.g. `my_data/<dir_created>/`, then set `HOST_DATA_DIR` in the eval script to that directory.
+Use `--file_name_col`, `--retention_time_col`, and `--smiles_col` if your column positions differ (defaults 0, 2, 3). Place `graphormer_input.csv` and your metadata pickle together in e.g. `my_data/<dir_created>/`, then set `HOST_DATA_DIR` in the eval script to that directory.
 
 ### Data Location 
 To simplify your experience, we highly recommend placing your data within a new directory here: ```my_data/<dir_created>```
@@ -149,11 +141,141 @@ sbatch ./make_predictions/app_evaluate_HILIC.sh
 Note: You will likely need to change the data paths in the script before running. 
 
 ## Evaluating Predictions
+After running your predictions, ensure that they exists in the correct directory `predictions_HILIC` or `predictions_RP`. For a quick sanity check, you can run the following to get a quick overview report of the predictions made by Graphormer-RT.
 ```bash
+./data_prep/evaluate_rt_preds/analyze_predictions.py \ 
+  -i <predictions.csv> \ 
+  -o <output_name_report.txt> 
 ```
 
 ## Applying Scoring Frameworks
+> **NOTE 1:** Please ensure that both RP and HILIC raw datasets are organized in their own folders respectively. 
+
+> **NOTE 2:** If you have validated observations of HILIC data, please ensure you've ran the model predictions following the steps outlined in [Making RT Predictions](#making-rt-predictions). 
+
+> **NOTE 3:** Ensure you ran `./rm_stereochemistry.py` to generate the reference stereo files.
 ```bash
+./data_prep/process_lcms_data/rm_stereochemistry.py \
+  -i <aggregated.csv> -o <aggregated_destereo.csv> \
+  --smiles-col-index 3 --has-header
+```
+
+A quick reminder that your directory tree should look something like this before running this script:
+```text
+deep_metab/
+├── all_RP_raw_data/
+│   ├── rp_1.csv/
+│   ├──  rp_2.csv/
+|   └── ...
+├── all_HILIC_raw_data/
+│   ├── hilic_1.csv/
+│   ├──  hilic_2.csv/
+|   └── ...
+├── HILIC_KNOWNS/ # if you have
+│   ├── hilic_knowns.csv/
+│   └── hilic_knowns_pred.csv
+├── predictions_HILIC/ 
+│   └── hilic_preds.csv
+├── predictions_RP/ 
+│   └── RP_preds.csv
+├── HILIC_KNOWNS/ # if you have
+│   ├── hilic_knowns.csv/
+│   └── hilic_knowns_pred.csv
+├── Destereo_Files/ # if you have
+│   ├── hilic_destereo.csv/
+│   └── rp_destereo.csv
+├── ...
+```
+
+This script appends predicted retention times (RTs) to LC-MS annotation files and/or performs post-hoc analysis on existing files. It supports both HILIC and RP chromatography workflows, with optional RT plausibility filtering and stereochemistry flagging. The goal of this step is to uniquely identify annotations from ambiguous annotations.
+
+The full downstream workflow goes like this:
+1. **RT Flagging** (Only if validated observations (knowns) are provided)
+2. **Stereochemistry Stripping** (Must provide a reference data where smiles with stereochemistry are stripped.)
+3. **Apply Scoring Framework**
+
+### Required Arguments
+| Flag            | Description                                                                    |
+| --------------- | ------------------------------------------------------------------------------ |
+| `-i`, `--input` | Input directory containing LC-MS annotation files (raw or previously appended) |
+| `-t`, `--type`  | Chromatography type: `hilic` or `rp`                                           |
+| `--stereo_file` | Destereochemistry reference file used for stereo handling                      |
+| `-p`, `--preds`  | CSV containing SMILES and predicted RTs (required for append mode) |
+
+### Modes of Operation
+The script can be run in different modes depending on which flags are provided. The table below summarizes how each mode behaves.
+| Mode                     | Flags Required            | What It Does                                                    | Writes Files?          |
+| ------------------------ | ------------------------- | --------------------------------------------------------------- | ---------------------- |
+| **Append only**          | `-a`, `-p`                | Appends predicted RTs (lookup by SMILES) to each input file     | ❌ No (unless `--save`) |
+| **Analyze only**         | `-s`                      | Computes ambiguity metrics and RT statistics and prints results | ❌ No                   |
+| **Append + Analyze**     | `-a`, `-p`, `-s`          | Appends predicted RTs **and** reports summary statistics        | ❌ No (unless `--save`) |
+| **RT-filtered analysis** | `-s`, `--rt_filter`, `--knowns`, `--knowns_pred`       | Applies RT plausibility filtering before computing statistics   | ❌ No (unless `--save`) |
+| **RT-filtered append**   | `-a`, `-p`, `--rt_filter`, `--knowns`, `--knowns_pred` | Appends RTs and filters implausible annotations                 | ❌ No (unless `--save`) |
+
+### RT Flagging (Optional)
+> NOTE: Only use this flag if KNOWNS are provided! Currently, only HILIC KNOWNS are provided, so our function will only support HILIC data at the moment.
+
+| Flag            | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| `--rt_filter`   | Enable RT plausibility filtering                              |
+| `--k_std`       | Standard-deviation multiplier for RT window (default: `2.0`)  |
+| `--min_calib_n` | Minimum number of calibration points required (default: `50`) |
+
+### Stereochemistry Handling
+| Flag            | Description                                                      |
+| --------------- | ---------------------------------------------------------------- |
+| `--flag_stereo` | Flag rows where stereochemistry is present (`is_stereo == True`) |
+
+### Other Optional Arguments
+| Flag             | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| `--save`                  | Enables writing appended and/or filtered outputs to disk        |
+| `--knowns`       | File containing known compounds for RT calibration (optional)      |
+| `--knowns_preds` | Predicted RTs for known compounds (used for calibration)           |
+
+### Full Workflow Usage (HILIC w/ Knowns)
+
+```bash
+./data_prep/eval_rt_preds/filter_and_scoring.py \
+  -i <all_HILIC_raw_data>/ \
+  -p predictions_HILIC/<hilic_preds.csv> \
+  -t hilic \
+  -a \
+  --knowns ../HILIC_KNOWNS/<HILIC_KNOWNS_DATA.csv> \
+  --knowns_preds ../HILIC_KNOWNS/<HILIC_KNOWNS_PREDS.csv> \
+  --save \
+  --stereo_file <Destereo_Files/hilic_destereo> \ 
+  --flag_stereo \
+  --rt-filter
+
+```
+
+### Full Workflow Usage (HILIC w/o Knowns)
+
+```bash
+./data_prep/eval_rt_preds/filter_and_scoring.py \
+  -i <all_HILIC_raw_data>/ \
+  -p predictions_HILIC/<hilic_preds.csv> \
+  -t hilic \
+  -a \
+  --save \
+  --stereo_file <Destereo_Files/hilic_destereo> \ 
+  --flag_stereo
+
+```
+
+### Full Workflow Usage (RP w/o Knowns)
+
+```bash
+./data_prep/eval_rt_preds/filter_and_scoring.py \
+  -i <all_RP_raw_data>/ \
+  -p predictions_RP/<RP_preds.csv> \
+  -t rp \
+  -a \
+  --save \
+  --stereo_file <Destereo_Files/rp_destereo> \ 
+  --flag_stereo
+
 ```
 
 ## Extra Scripts
