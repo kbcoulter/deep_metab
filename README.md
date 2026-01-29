@@ -28,7 +28,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
 
 ## Quick Links:
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
- - **Graphormer-RT Forked Submodule:[https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
+ - **Graphormer-RT Forked Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
  - **RT-Zenodo: https://zenodo.org/records/15021743**
 
 ## Features
@@ -45,8 +45,8 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |
 | **Quality Control** | Automatically flag potentially mis‑annotated mass feature IDs |
-| **Stereoisomer Flagging** | Identify and label stereoisomers mass feature IDs|
-| **LazyPredict ✨** | Run **entire** automated workflow|
+| **Stereoisomer Flagging** | Identify and label stereoisomer mass feature IDs |
+| **LazyPredict ✨** | Run **entire** automated workflow |
 
 
 
@@ -60,11 +60,11 @@ Choose the instructions based on your system permissions:
 |-------------|---------------|---------------|--------|
 | **HPC / No Root Access** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
 | **HPC / No Root Access** | Automated | LazyPredict | 🚧 |
-| **Local Machine / Root Access Available** | Step-by-Step | Root Manual Guide| 🚧 |
+| **Local Machine / Root Access Available** | Step-by-Step | Root Manual Guide | 🚧 |
 | **Local Machine / Root Access Available** | Automated | Root LazyPredict | 🚧 |
 
 
-#### Support for non HPC machines is in development and is expected soon...
+#### Support for non-HPC machines is in development and is expected soon...
 ---
 
 ## Warnings:
@@ -82,10 +82,10 @@ workspace/Graphormer-RT/my_data/HILIC_ft/
 ```
 
 > **Writing over Weights:**
-> Finetuning HILIC will write over ```best_checkpoint.pt``` and ```last_checkpoint.pt``` should they exist in ```graphormer_checkpoints_HILIC/```.** 
+> Finetuning HILIC will write over ```best_checkpoint.pt``` and ```last_checkpoint.pt``` should they exist in ```graphormer_checkpoints_HILIC/```.
 
 ## Common Issues:
-* Fairseq Errors: Please ensure that you are using the Docker provided. The original [Graphormer](https://github.com/microsoft/Graphormer) was built on a Snapshot Release of [fairseq](https://github.com/facebookresearch/fairseq). This version is not available via conda/mamba. If error persists, please ensure that contianer version instillation matches the most recent available on [Docker](https://hub.docker.com/r/dnhem/proj_deepmetab).
+* Fairseq Errors: Please ensure that you are using the Docker provided. The original [Graphormer](https://github.com/microsoft/Graphormer) was built on a Snapshot Release of [fairseq](https://github.com/facebookresearch/fairseq). This version is not available via conda/mamba. If error persists, please ensure that container version installation matches the most recent available on [Docker](https://hub.docker.com/r/dnhem/proj_deepmetab).
 
 * Python Package Issues: Please first ensure that you are using the Docker provided. Reference previous fairseq issue for guidance. 
  
