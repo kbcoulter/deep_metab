@@ -3,22 +3,23 @@
 
 #SBATCH --account=bgmp
 #SBATCH --partition=gpu
+#SBATCH --mem=50G
 #SBATCH --job-name=apptainer_eval_HILIC
-#SBATCH --time=3:00:00
+#SBATCH --time=00:10:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus=1   
 #SBATCH --output=evaluate_HILIC_%j.out.log
 #SBATCH --error=evaluate_HILIC_%j.err.log
 
-HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/kcoulter/deep_metab/sample_data_0001"
+HOST_DATA_DIR="/projects/bgmp/shared/groups/2025/deepmetab/dnhem/deep_metab/DOM_SAMPLE_DATA"
 # SET ABSOLUTE PATH CONTAINING 1 .csv FOR RT AND 1 .pkl FOR CHROMATOGRAPHY CONDITIONS
 
 #PREDS_DIR="predictions_RP"
 #mkdir -p "$PREDS_DIR"
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
-CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit) # <-- Retention time data
+CONTAINER_DATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*HILIC_KNOWNS_DATA.csv" -print -quit) # <-- Retention time data
 CONTAINER_METADATA_FILE=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit) # <-- Chromatography sample conditions
 
 apptainer exec --nv \

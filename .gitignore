@@ -11,5 +11,13 @@
 
 # ignore sample data
 *emp_500_RP_data
-
+HILIC_KNOWNS/
+HILIC_Raw_Data_Combined/
+dom_sample_RP_data/
 *.txt
+
+# test script
+test.ipynb
+
+# running script
+dom_scripts/run_append.sh

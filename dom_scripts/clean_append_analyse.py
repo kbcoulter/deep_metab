@@ -34,11 +34,13 @@ def get_args():
     parser.add_argument("--knowns_preds", help="Specify the preds file containing knowns if exists.",
                         default=None)
     
+    #
+    
     # Extra shit
     parser.add_argument("--stereo_file", help="Specify the destereo file.",
                         default=None, required=True)
-    parser.add_argument("--drop_stereo", action="store_true",
-        help="Drop rows where is_stereo is True before calibration/scoring."
+    parser.add_argument("--flag_stereo", action="store_true",
+        help="Flag rows where is_stereo is True after."
     )
     
 
@@ -151,24 +153,31 @@ def main(args) -> int:
     smiles_dict = load_smiles_dict(args.preds)
 
     # state (kept local, no globals)
-    # post filter/ before scoring
-    ambiguous_count_0 = 0 
-    unambiguous_count_0 = 0
-    # post filter/ scoring
-    ambiguous_count_1 = 0
-    unambiguous_count_1 = 0
     # filter status
     ambiguous_count_before_filter = 0
     unambiguous_count_before_filter = 0
     rt_pass_count = 0
     rt_fail_count = 0
+    # post filter/ before scoring and destereo
+    ambiguous_count_after_filter = 0 
+    unambiguous_count_after_filter = 0
+    new_unambiguous_from_filter_total = 0
+    # rp specific variables only
+    ambiguous_count_before_stereo = 0
+    unambiguous_count_before_stereo = 0
+    # post destereo
+    ambiguous_count_post_stereo = 0
+    unambiguous_count_post_stereo = 0
+    # post filter/ scoring
+    ambiguous_count_1 = 0 # final count of ambiguous annotations
+    unambiguous_count_1 = 0
 
+    # for scoring 
     total_ambiguous_ids = set()
     total_unambiguous_ids = set()
 
-    # destereo
-    counts_w_stereo = 0
-    counts_a_stereo = 0
+    # final counts
+    final_unambiguous_count = 0 # unambi_after_filter + unambi_after_destereo + unambi_after_scoring
 
     print("Processing files...")
     files = list_files(dir_path)
@@ -188,7 +197,7 @@ def main(args) -> int:
     all_delta_records = []
 
     if rt_filter_enabled:
-        if use_knowns:
+        if use_knowns and data_type != "rp": # ONLY USE HILIC KNOWNS!!!
             # build dict from knowns predictions
             print("[INFO] Knowns Detected! Pass 1/2: Building Calibration of ΔRT distribution")
             known_dict = load_smiles_dict(knowns_smiles)
@@ -208,36 +217,6 @@ def main(args) -> int:
                     "chrom_type": data_type,
                     "source": "knowns"
                 }))
-
-        else:
-            for file in tqdm(files, desc="Pass 1/2: Building global ΔRT distribution"):
-                file_path = os.path.join(dir_path, file)
-                df_csv = load_and_prepare(file_path, append_switch=args.append, smiles_dict=smiles_dict)
-                # Drop stereo
-                if args.drop_stereo:
-                    # track file name
-                    df_csv["File Name"] = file
-
-                    # left-merge to flag stereo rows
-                    df_csv = df_csv.merge(
-                        stereo_df.assign(_drop_stereo=True),
-                        on=["File Name", "smiles"],
-                        how="left"
-                    )
-
-                    # drop stereo matches
-                    df_csv = df_csv[df_csv["_drop_stereo"].isna()].drop(columns="_drop_stereo")
-                    df_csv = add_rt_diffs(df_csv)
-
-                d = get_initial_unambig_delta(df_csv)  # your original strategy
-                if d.size:
-                    all_delta.append(d)
-                    all_delta_records.append(pd.DataFrame({
-                        "delta_rt_sec": d,
-                        "abs_delta_rt_sec": np.abs(d),
-                        "chrom_type": data_type,
-                        "source": file
-                    }))
 
         # Consolidate
         all_delta = np.concatenate(all_delta) if all_delta else np.array([]) # empty if nth
@@ -270,48 +249,78 @@ def main(args) -> int:
         for file in tqdm(files, desc="Pass 2/2: Processing & scoring"):
             file_path = os.path.join(dir_path, file)
             df_csv = load_and_prepare(file_path, args.append, smiles_dict)
-            # Drop stereo
-            if args.drop_stereo:
-                df_csv["File Name"] = file
-                counts_w_stereo += df_csv["Mass Feature ID"].nunique()
-                stereo_groups = (
-                    stereo_df
-                    .groupby(["File Name", "Mass Feature ID"])["is_stereo"]
-                    .any()
-                    .reset_index()
-                )
-                stereo_groups = stereo_groups[stereo_groups["is_stereo"]]
-
-                drop_idx = pd.MultiIndex.from_frame(stereo_groups[["File Name", "Mass Feature ID"]])
-                df_idx = pd.MultiIndex.from_frame(df_csv[["File Name", "Mass Feature ID"]])
-                # drop stereo matches
-                df_csv = df_csv[~df_idx.isin(drop_idx)]
-
-                counts_a_stereo += df_csv["Mass Feature ID"].nunique()
-
             # add the rt differences
             df_csv = add_rt_diffs(df_csv)
 
-            # get initial counts before applying the filtering
-            # BEFORE scoring counts
-            before_filter_counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo
-            ambiguous_count_before_filter += int((before_filter_counts > 1).sum())
-            unambiguous_count_before_filter += int((before_filter_counts == 1).sum())
-
             # RT filter (if enabled)
-            if rt_filter_enabled and global_mu is not None and global_sigma is not None:
-                n_before = len(df_csv) # len before filter
+            if rt_filter_enabled and global_mu is not None and global_sigma is not None and data_type != "rp":
+                # get initial counts before applying the filtering
+                # BEFORE scoring counts
+                before_filter_counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo
+                ambiguous_count_before_filter += int((before_filter_counts > 1).sum())
+                unambiguous_count_before_filter += int((before_filter_counts == 1).sum())
+
+                n_before = len(df_csv) # number of annotations before filter
                 df_csv = apply_rt_filter(df_csv, global_mu, global_sigma, args.k_std)
-                n_after = len(df_csv) # len after filter
+                n_after = len(df_csv) # number of annotations after filter
                 rt_pass_count += n_after
                 rt_fail_count += (n_before - n_after)
+                # AFTER FILTERING
+                # BEFORE scoring counts
+                after_filter_counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo OR filter
+                # sanity check on NaNs values if exist
+                ambiguous_count_after_filter += int((after_filter_counts > 1).sum()) # after filtering
+                unambiguous_count_after_filter += int((after_filter_counts == 1).sum()) # after filtering
+                # NEW: track newly unambiguous IDs created by filtering
+                ambig_before_ids = set(before_filter_counts[before_filter_counts > 1].index)
+                unambig_after_ids = set(after_filter_counts[after_filter_counts == 1].index)
 
-            # BEFORE scoring counts
-            counts = df_csv["Mass Feature ID"].value_counts() #<- after destereo OR filter
-            # sanity check on NaNs values if exist
-            ambiguous_count_0 += int((counts > 1).sum())
-            unambiguous_count_0 += int((counts == 1).sum())
+                new_unambig_from_filter = ambig_before_ids & unambig_after_ids
+                new_unambiguous_from_filter_total += len(new_unambig_from_filter)
+                # now just focus on the ambiguous ones only
+                group_size = df_csv.groupby("Mass Feature ID")["Mass Feature ID"].transform("size")
+                df_csv = df_csv[group_size > 1]
 
+            #Destereoring
+            # adding stereo and smiles_destereo
+            # Grabbing counts first before destereo for rp data
+            if data_type == "rp":
+                id_counts = df_csv["Mass Feature ID"].value_counts()
+                ambiguous_count_before_stereo += int((id_counts > 1).sum())
+                unambiguous_count_before_stereo += int((id_counts == 1).sum())
+            if args.flag_stereo:
+                df_csv["File Name"] = file
+                # adding stereo and smiles_destereo
+                df_csv = df_csv.merge(
+                    stereo_df[["File Name", "Mass Feature ID", "smiles", "smiles_destereo", "is_stereo"]],
+                    on=["File Name", "Mass Feature ID", "smiles"],
+                    how="left"
+                )
+                # group by mass feature id -> check if all smles_destereo are the same / is_stereo = True -> unambiguous annotations due to destoere
+                # else: still ambiguous and will be put into the scoring framework
+                group_cols = ["Mass Feature ID"]
+                has_destereo = df_csv["smiles_destereo"].notna()
+
+                nunique_destereo = (
+                    df_csv.loc[has_destereo]
+                    .groupby(group_cols)["smiles_destereo"]
+                    .transform("nunique")
+                )
+
+                nunique_destereo = nunique_destereo.reindex(df_csv.index).fillna(0).astype(int)
+                destereo_resolved = (nunique_destereo == 1)
+
+                # get number of unambiguous
+                destereo_unambi_counts = (
+                    df_csv.loc[destereo_resolved, ["File Name", "Mass Feature ID"]]
+                    .drop_duplicates()
+                    .shape[0]
+                    )
+                unambiguous_count_post_stereo += (destereo_unambi_counts )#- unambiguous_count_after_filter) if data_type != "rp" else (destereo_unambi_counts - unambiguous_count_before_stereo)
+                # update df csv to just the ambiguos one still
+                df_csv = df_csv[~destereo_resolved]
+                ambiguous_count_post_stereo += int((df_csv["Mass Feature ID"].value_counts() > 1).sum())
+            
             # Ranking
             df_csv["rank_mz_err"] = df_csv.groupby("Mass Feature ID")["m/z Error Score"].rank(method="dense", ascending=True)
             df_csv["rank_entropy"] = df_csv.groupby("Mass Feature ID")["Entropy Similarity"].rank(method="dense", ascending=False)
@@ -319,20 +328,24 @@ def main(args) -> int:
 
             # AFTER counts
             id_counts = df_csv["Mass Feature ID"].value_counts()
-            single_occurrence_ids = set(id_counts[id_counts == 1].index)
+            #single_occurrence_ids = set(id_counts[id_counts == 1].index)
 
             cond = (df_csv["rank_mz_err"] == 1) & (df_csv["rank_entropy"] == 1) & (df_csv["rank_delta_rt"] == 1)
             ids_with_111 = set(cond.groupby(df_csv["Mass Feature ID"]).any().loc[lambda s: s].index)
+            # tracking stereo count
+            #id_is_stereo = df_csv.groupby("Mass Feature ID")["is_stereo"].any()
 
-            unambiguous_ids = single_occurrence_ids | ids_with_111
+            unambiguous_ids = ids_with_111
             ambiguous_ids = set(id_counts[id_counts > 1].index) - ids_with_111
 
-            total_unambiguous_ids.update(unambiguous_ids)
-            total_ambiguous_ids.update(ambiguous_ids)
+            total_unambiguous_ids.update(unambiguous_ids) # unmabgious count after scoring
+            total_ambiguous_ids.update(ambiguous_ids) # ambiguous count after scoring
 
-            unambiguous_count_1 += len(unambiguous_ids)
-            ambiguous_count_1 += len(ambiguous_ids)
+            unambiguous_count_1 += len(unambiguous_ids) # uniquely identified from scoring
+            ambiguous_count_1 += len(ambiguous_ids) # final ambiguous left over
 
+    # unambi after filter = 0 for rp
+    final_unambiguous_count = unambiguous_count_post_stereo + unambiguous_count_1 
     # ---- Report ----
     if rt_filter_enabled:
         denom = rt_pass_count + rt_fail_count
@@ -343,45 +356,82 @@ def main(args) -> int:
         print(f"  Fraction removed: {frac:.3f}")
 
     if args.stats:
-        total_counts_bf = ambiguous_count_before_filter + unambiguous_count_before_filter
-        pct_amb_bf = round(ambiguous_count_before_filter*100/total_counts_bf, 2)
-        pct_umb_bf = round(unambiguous_count_before_filter*100/total_counts_bf, 2)
+        report = """"""
+        if rt_filter_enabled and data_type != "rp":
+            # after filtering
+            total_counts_bf = ambiguous_count_before_filter + unambiguous_count_before_filter
+            pct_amb_bf = round(ambiguous_count_before_filter*100/total_counts_bf, 2)
+            pct_umb_bf = round(unambiguous_count_before_filter*100/total_counts_bf, 2)
 
-        total_counts = ambiguous_count_0 + unambiguous_count_0
-        pct_amb0 = round(ambiguous_count_0 * 100 / total_counts, 2) if total_counts else 0
-        pct_un0 = round(unambiguous_count_0 * 100 / total_counts, 2) if total_counts else 0
-        pct_amb1 = round(ambiguous_count_1 * 100 / total_counts, 2) if total_counts else 0
-        pct_un1 = round(unambiguous_count_1 * 100 / total_counts, 2) if total_counts else 0
+            # after filtering
+            total_counts_af = ambiguous_count_after_filter + unambiguous_count_after_filter
+            pct_amb0 = round(ambiguous_count_after_filter * 100 / total_counts_af, 2) if total_counts_af else 0
+            pct_un0 = round(unambiguous_count_after_filter * 100 / total_counts_af, 2) if total_counts_af else 0
 
-        diff_amb = ambiguous_count_1 - ambiguous_count_0
-        diff_un = unambiguous_count_1 - unambiguous_count_0
-
-        report = f"""Before RT filtering / scoring:
+            fitler_report = f"""Before RT filtering:
 Ambiguous:   {ambiguous_count_before_filter} ({pct_amb_bf}%)
 Unambiguous: {unambiguous_count_before_filter} ({pct_umb_bf}%)
 
 After RT filtering:
-Ambiguous:   {ambiguous_count_0} ({pct_amb0}%)
-Unambiguous: {unambiguous_count_0} ({pct_un0}%)
+Ambiguous:   {ambiguous_count_after_filter} ({pct_amb0}%)
+Unambiguous: {unambiguous_count_after_filter} ({pct_un0}%)
 
-After RT filtering + scoring:
+Number of unambiguous coming from previously ambiguous annotations: {new_unambiguous_from_filter_total}
+"""
+            report += fitler_report
+        # after destereo
+        if args.flag_stereo:
+            # rp specific total counts
+            total_counts_bd = ambiguous_count_before_stereo + unambiguous_count_before_stereo
+            # after destereoring
+            total_counts_ad = ambiguous_count_post_stereo + unambiguous_count_post_stereo # should literally be equal to ambiguos post filtering (HILIC ONLY)
+            pct_ambd = round(ambiguous_count_post_stereo*100/total_counts_ad, 2)
+            pct_unambd = round(unambiguous_count_post_stereo*100/total_counts_ad, 2)
+
+            unambi_due_to_destreo = unambiguous_count_post_stereo-unambiguous_count_after_filter if data_type != "rp" else unambiguous_count_post_stereo-unambiguous_count_before_stereo
+            destereo_report = f"""Before Destereo (Values shown for RP, 0 for HILIC since its the same as post filter)
+Ambiguous:   {ambiguous_count_before_stereo} ({round(ambiguous_count_before_stereo*100/total_counts_bd, 2) if data_type != "hilic" else 0 }%)
+Unambiguous: {unambiguous_count_before_stereo} ({round(unambiguous_count_before_stereo*100/total_counts_bd, 2) if data_type != "hilic" else 0 }%)
+
+After Destereo (Following Data Takes into Account Changes from Ambigous Annotations Post Filtering):
+Ambiguous:   {ambiguous_count_post_stereo} ({pct_ambd}%)
+Unambiguous: {unambiguous_count_post_stereo} ({pct_unambd}%) 
+Unambiguous Due to Destereo: {unambi_due_to_destreo} <- from just the Ambiguous Prop Before Destereo
+
+"""
+            report += destereo_report
+        # after scoring
+        total_counts_as = ambiguous_count_1 + unambiguous_count_1 # should be equal to the number of ambiguous post destereo
+        pct_amb1 = round(ambiguous_count_1 * 100 / total_counts_as, 2) if total_counts_as else 0
+        pct_un1 = round(unambiguous_count_1 * 100 / total_counts_as, 2) if total_counts_as else 0
+
+        # final stats count
+        diff_amb = (ambiguous_count_1 - ambiguous_count_before_filter 
+                    if data_type != "rp" 
+                    else ambiguous_count_1 - ambiguous_count_before_stereo)
+        diff_un = (final_unambiguous_count - unambiguous_count_before_filter 
+                   if data_type != "rp" 
+                   else final_unambiguous_count - unambiguous_count_before_stereo)
+        
+        scoring_report = f"""After Scoring:
 Ambiguous:   {ambiguous_count_1} ({pct_amb1}%)
 Unambiguous: {unambiguous_count_1} ({pct_un1}%)
 
-Changes:
-Δ Ambiguous:   {diff_amb} | % change: {round(diff_amb*100/ambiguous_count_0, 2) if ambiguous_count_0 else 0}%
-Δ Unambiguous: {diff_un} | % change: {round(diff_un*100/unambiguous_count_0, 2) if unambiguous_count_0 else 0}%
+Final Changes:
+Final Number of Ambiguous: {ambiguous_count_1} ({round(ambiguous_count_1*100/total_counts_af, 2) 
+                                                 if data_type != "rp" 
+                                                 else round(ambiguous_count_1*100/total_counts_bd, 2)}%)
+Final Number of Unambiguous Annotations: {final_unambiguous_count} ({round(final_unambiguous_count*100/total_counts_af, 2) 
+                                                 if data_type != "rp" 
+                                                 else round(final_unambiguous_count*100/total_counts_bd, 2)}%)
+Δ Ambiguous:   {diff_amb} | % change: {round(diff_amb*100/ambiguous_count_before_filter, 2) 
+                                       if data_type != "rp" 
+                                       else round(diff_amb*100/ambiguous_count_before_stereo, 2)}%
+Δ Unambiguous: {diff_un} | % change: {round(diff_un*100/unambiguous_count_before_filter, 2) 
+                                      if data_type != "rp" 
+                                      else round(diff_un*100/unambiguous_count_before_stereo, 2)}%
 """
-        if args.drop_stereo:
-            pct_destereo = round(counts_a_stereo * 100 / counts_w_stereo, 2)
-            pct_stere = round((counts_w_stereo - counts_a_stereo) * 100 / counts_w_stereo, 2)
-            stereo_rpt = f"""Destereo Summary:
-Before Destereoisomerizing: {counts_w_stereo}
-Ambiguous Due to Stereoisomers: {counts_w_stereo - counts_a_stereo} MF IDs ({pct_stere}%)
-Number of Destereo: {counts_a_stereo} MF IDS ({pct_destereo}%)
-"""
-
-            report = stereo_rpt + report
+        report += scoring_report
         out = f"{data_type}_stats_report.txt"
         out_dir = f'{data_type}_Calibration_&_Scoring'
         os.makedirs(f'{data_type}_Calibration_&_Scoring', exist_ok=True)
