@@ -18,18 +18,23 @@ This repository provides a full pipeline for applying modern deep learning to LC
 - [Background](#background)
 - [Quick Links](#quick-links)
 - [Features](#features)
-- [HowTo (Manuals)](#how-to)
+- [Manuals (HowTo)](#how-to)
 - [Warnings](#warning)
 - [Common Issues](#common-issues)
-- [**References**](documentation/references.md)
+- [References](documentation/references.md)
 - [Contact](#contact-or-contribute)
 - [License](LICENSE)
 
 
 ## Quick Links:
+- **Graphormer-RT For Deep Learning:**
+    - **Graphormer-RT: https://github.com/HopkinsLaboratory/Graphormer-RT**
+    - **Our Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
+- **Zenodo For Model Weights**:
+    - **"DM" Zenodo: 🚧**
+    - **"OG" Zenodo: https://zenodo.org/records/15021743**
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
- - **Graphormer-RT Forked Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
- - **RT-Zenodo: https://zenodo.org/records/15021743**
+ - **RepoRT: https://github.com/michaelwitting/RepoRT**
 
 ## Features
 
@@ -40,20 +45,20 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **LC–MS Preprocessing** | Tools to clean, format, and structure LC–MS datasets for prediction |
 | **Data Loaders** | Scripts to load, featurize, and register data  |
 | **Workflow Setup** | Setup directory, container, etc. for RP/HILIC/Both RT prediction and annotation  |
-| **Model Training** | Train Graphormer‑RT from scratch (RP) |
+| **Model Training** | Train Graphormer‑RT from scratch (RP) 🚧|
 | **Model Finetuning** | Finetune Graphormer‑RT models (HILIC transfer learning and HILIC finetuning) |
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |
 | **Quality Control** | Automatically flag potentially mis‑annotated mass feature IDs |
 | **Stereoisomer Flagging** | Identify and label stereoisomer mass feature IDs |
-| **LazyPredict ✨** | Run **entire** automated workflow |
+| **LazyPredict ✨** | Run **entire** automated workflow 🚧|
 
 
 
 
 ## How To:
 
-Choose the instructions based on your system permissions:
+Choose the manual based on your system permissions:
 
 
 | Environment | Workflow Type | Documentation | Status |
@@ -81,15 +86,15 @@ my_data/HILIC_ft/
 workspace/Graphormer-RT/my_data/HILIC_ft/
 ```
 
-> **Writing over Weights:**
-> Finetuning HILIC will write over ```best_checkpoint.pt``` and ```last_checkpoint.pt``` should they exist in ```graphormer_checkpoints_HILIC/```.
-
 ## Common Issues:
 * Fairseq Errors: Please ensure that you are using the Docker provided. The original [Graphormer](https://github.com/microsoft/Graphormer) was built on a Snapshot Release of [fairseq](https://github.com/facebookresearch/fairseq). This version is not available via conda/mamba. If error persists, please ensure that container version installation matches the most recent available on [Docker](https://hub.docker.com/r/dnhem/proj_deepmetab).
 
-* Python Package Issues: Please first ensure that you are using the Docker provided. Reference previous fairseq issue for guidance. 
+* Python Package Issues: Please first ensure that you are using the [Docker](https://hub.docker.com/r/dnhem/proj_deepmetab) materials provided.
  
+* Obviously Incorrect Predictions: This workflow does not verify that HILIC data is used with the HILIC model (or RP data with the RP model). As a result, it is easy to accidentally input HILIC data into the RP model, which produces extremely inaccurate predictions.
+
 * **If your issue is not shown above, please [raise an issue](https://github.com/kbcoulter/deep_metab/issues/new).**
+
 
 
 
