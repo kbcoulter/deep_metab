@@ -13,12 +13,12 @@
 
 set -e
 
-# Defaults
+# Defaults 
 HOST_DATA_DIR_DEFAULT="../my_data/HILIC_Posttraining/"
-CHECKPOINT_DIR_DEFAULT="/workspace/Graphormer-RT/checkpoints_HILIC"
-SAVE_PATH_DEFAULT="./predictions_HILIC"
+CHECKPOINT_DIR_DEFAULT="../graphormer_checkpoints_HILIC"
+SAVE_PATH_DEFAULT="../../../predictions_HILIC"
 
-# Active
+#Active
 HOST_DATA_DIR="${HOST_DATA_DIR_DEFAULT}"
 CHECKPOINT_DIR="${CHECKPOINT_DIR_DEFAULT}"
 SAVE_PATH="${SAVE_PATH_DEFAULT}"
@@ -49,11 +49,11 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      echo "Usage: $0 [options]"
+      echo "Usage: sbatch $0 [options]"
       echo ""
-      echo "  --host-data-dir <path>      Directory containing 1 .csv + 1 .pkl (default: ${HOST_DATA_DIR_DEFAULT})"
-      echo "  --checkpoint-dir <path>     Checkpoint directory (default: ${CHECKPOINT_DIR_DEFAULT})"
-      echo "  --save-path <path>          Path to save predictions (default: ${SAVE_PATH_DEFAULT})"
+      echo "  --host-data-dir <path>      Directory containing 1 .csv + 1 .pickle"
+      echo "  --checkpoint-dir <path>     Checkpoint directory"
+      echo "  --save-path <path>          Base predictions directory"
       exit 0
       ;;
     *)
@@ -63,20 +63,27 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Collect Files
+
+# Collect Data
 DATA_CSV=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit)
 DATA_PKL=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit)
+
+if [[ -z "$DATA_CSV" || -z "$DATA_PKL" ]]; then
+  echo "Error: Could not find one .csv and one .pickle file in $HOST_DATA_DIR"
+  exit 1
+fi
+
 DATA_DIR="${SLURM_JOB_ID}.csv"
 
-# Run
+# Run App
 apptainer exec --nv \
     --bind "${CHECKPOINT_DIR}":/workspace/Graphormer-RT/checkpoints_HILIC \
     --bind "${HOST_DATA_DIR}":/data \
-    ../graphormercontainer.sif bash -c "
+    ./graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
-    export HILIC_DATA_FILE_PATH=\"${DATA_CSV}\" && \
-    export HILIC_METADATA_PATH=\"${DATA_PKL}\" && \
-    cd ../Graphormer-RT/graphormer/evaluate/ && \
+    export HILIC_DATA_FILE_PATH=\"/data/$(basename ${DATA_CSV})\" && \
+    export HILIC_METADATA_PATH=\"/data/$(basename ${DATA_PKL})\" && \
+    cd ./Graphormer-RT/graphormer/evaluate/ && \
     python evaluate_HILIC.py \
         --user-dir ../../graphormer \
         --num-workers 32 \
@@ -93,7 +100,7 @@ apptainer exec --nv \
         --mlp-layers 5 \
         --batch-size 64 \
         --num-classes 1 \
-        --save-path '${SAVE_PATH}/$DATA_DIR' \
-        --save-dir '${CHECKPOINT_DIR}' \
+        --save-path '${SAVE_PATH}/${DATA_DIR}' \
+        --save-dir '/workspace/Graphormer-RT/checkpoints_HILIC/' \
         --split train
 "

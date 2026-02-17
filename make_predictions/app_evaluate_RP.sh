@@ -14,9 +14,9 @@
 set -e
 
 # Default
-HOST_DATA_DIR_DEFAULT="../my_data/sample_data_0001"
-CHECKPOINT_DIR_DEFAULT="./graphormer_checkpoints_RP"
-SAVE_PATH_DEFAULT="./predictions_RP"
+HOST_DATA_DIR_DEFAULT="../my_data/sample_data_0001/"
+CHECKPOINT_DIR_DEFAULT="../graphormer_checkpoints_RP"
+SAVE_PATH_DEFAULT="../../../predictions_RP"
 
 # Active 
 HOST_DATA_DIR="${HOST_DATA_DIR_DEFAULT}"
@@ -66,16 +66,22 @@ done
 # Collect Data
 DATA_CSV=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.csv" -print -quit)
 DATA_PKL=$(find "$HOST_DATA_DIR" -maxdepth 1 -name "*.pickle" -print -quit)
+
+if [[ -z "$DATA_CSV" || -z "$DATA_PKL" ]]; then
+  echo "Error: Could not find one .csv and one .pickle file in $HOST_DATA_DIR"
+  exit 1
+fi
+
 DATA_DIR="${SLURM_JOB_ID}.csv"
 
 # Run App
 apptainer exec --nv \
     --bind "${CHECKPOINT_DIR}":/workspace/Graphormer-RT/checkpoints_RP \
     --bind "${HOST_DATA_DIR}":/data \
-    graphormercontainer.sif bash -c "
+    ./graphormercontainer.sif bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
-    export RP_DATA_FILE_PATH=\"${DATA_CSV}\" && \
-    export RP_METADATA_PATH=\"${DATA_PKL}\" && \
+    export RP_DATA_FILE_PATH=\"/data/$(basename ${DATA_CSV})\" && \
+    export RP_METADATA_PATH=\"/data/$(basename ${DATA_PKL})\" && \
     cd ./Graphormer-RT/graphormer/evaluate/ && \
     python evaluate.py \
         --user-dir ../../graphormer \
@@ -95,6 +101,6 @@ apptainer exec --nv \
         --batch-size 64 \
         --num-classes 1 \
         --save-path '${SAVE_PATH}/$DATA_DIR' \
-        --save-dir '${CHECKPOINT_DIR}' \
+        --save-dir '/workspace/Graphormer-RT/checkpoints_RP/' \
         --split train
 "

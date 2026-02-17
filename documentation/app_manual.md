@@ -4,23 +4,23 @@
 
 # Table of Contents
 
-🚀 **Getting Started**
+**Getting Started**
   - [Requirements](#requirements)
   - [Installation](#installation)
   - [Setup](#setup)
 
-🧪 **Data Preparation**
+**Data Preparation**
   - [LC-MS Metadata](#lc-ms-setup-information-metadata)
   - [LC-MS Prediction Data](#lc-ms-prediction-datasets)
   - [Data Location](#data-location)
   - [Data Assumptions](#data-assumptions)
 
-🤖 **Prediction and Scoring**
+**Prediction and Scoring**
   - [Making RT Predictions](#making-rt-predictions)
   - [Evaluating Predictions (Optional)](#evaluating-predictions)
   - [Applying Scoring Frameworks](#applying-scoring-frameworks)
 
-🧰 **Advanced & Extras**
+**Advanced & Extras**
   - [Fine-tuning Model Weights (Optional)](#finetuning-hilic-model-weights-optional)
     - [Splitting Data](#first-please-split-your-data)
 - [Extra Scripts (No Current Support)](#-extras)
@@ -28,7 +28,7 @@
 
 
 ###
-# 🚀 **Getting Started**
+# **Getting Started**
 ## Requirements
 **Please ensure that both SLURM and Apptainer are available on your device.** You can check this by running the following and ensuring that ``command not found`` is *not* returned:
 ```bash
@@ -73,7 +73,7 @@ From ```deep_metab```:
  #### To confirm setup, please ensure that the configuration shown in the terminal matches expected.
 > **Note:** We recommend leaving options with a default setting unchanged. For `--hweights` (HILIC weights) please specify `dm` (deep_metab), `og` (original Graphormer-RT), or provide your own with `--hweights-custom <custom_url>.` 
 ###
-# 🧪 **Data Preparation**
+# **Data Preparation**
 ## Data Preparation
 
 ### LC-MS Setup Information Metadata:
@@ -128,7 +128,7 @@ To simplify your experience, we **highly recommend** placing your data within a 
 
 
 ## Finetuning HILIC Model Weights (Optional)
-### 🧰 **Advanced**
+
 This step is entirely optional, but recommended if you have **HILIC** data with validated retention times to train with.
 
 
@@ -171,7 +171,7 @@ Additional Options Include: seed, attention-dropout, act-dropout, dropout, adam-
 >**NOTE 2:** metadata.pkl file exists in each .csv file directory. This file can be identical, thanks to the setupID code.
 
 ###
-# 🤖 **Prediction and Scoring**
+# **Prediction and Scoring**
 
 ## Making RT Predictions
 
@@ -337,7 +337,7 @@ The script can be run in different modes depending on which flags are provided. 
 
 ```
 ###
-# 🧰 **Extras**
+# **Extras**
 These scripts were used in the creation of this repository and to complete associated analyses specific to our goals. They are not optimized for user experience and may include multiple hard paths, issues, or assumptions that do not translate to your use cases. They are included only in the hopes that they save you time and/or effort in your application of this tool. These scripts can all be found in `extra_scripts/` Command-line interface scripts that may be of great use are marked with a star: ⭐️ 
 
 > **Note**  We do not offer support for these scripts. 
