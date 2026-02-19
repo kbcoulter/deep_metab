@@ -14,3 +14,7 @@
 *my_data/HILIC_Posttraining
 *my_data/sample_data_0001
 *.pyc
+
+
+# additional ignore files
+dom_scripts/
