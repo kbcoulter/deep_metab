@@ -74,11 +74,12 @@ done
 
 #Setup
 echo "Beginning Setup for RP."
-cd ../..
-git submodule init
-git submodule update
+echo "Setting Up Graphormer Submodule"
+git submodule --init --update
+#cd ../..
 echo "Building Apptainer image from ${IMAGE}:${VERSION}"
-apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION}
+echo "  This May Take a While..."
+apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION} 2>&1 | grep '^INFO:'
 mkdir -p graphormer_checkpoints_RP
 wget -O graphormer_checkpoints_RP/RP_WEIGHTS.pt "${RWEIGHTS}"
 mkdir -p predictions_RP

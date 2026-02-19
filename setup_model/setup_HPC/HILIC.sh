@@ -91,11 +91,14 @@ done
 
 # Setup
 echo "Beginning Setup for HILIC."
-cd ../..
+echo "Setting Up Graphormer Submodule"
+git submodule update --init --recursive
+#cd ../..
 git submodule init
 git submodule update
 echo "Building Apptainer image from ${IMAGE}:${VERSION}"
-apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION}
+echo "  This May Take a While..."
+apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION} 2>&1 | grep '^INFO:'
 mkdir -p graphormer_checkpoints_HILIC
 wget -O graphormer_checkpoints_HILIC/HILIC_WEIGHTS.pt "${HWEIGHTS}"
 mkdir -p predictions_HILIC
