@@ -31,8 +31,8 @@ This repository provides a full pipeline for applying modern deep learning to LC
     - **Graphormer-RT: https://github.com/HopkinsLaboratory/Graphormer-RT**
     - **Our Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
 - **Zenodo For Model Weights**:
-    - **"DM" Zenodo:https://zenodo.org/records/18867980**
-    - **"OG" Zenodo: https://zenodo.org/records/15021743**
+    - **Graphormer-RT or "OG" Weights: https://zenodo.org/records/15021743**
+    - **Our or "DM" Weights: https://zenodo.org/records/18867980**
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
  - **RepoRT: https://github.com/michaelwitting/RepoRT**
 
