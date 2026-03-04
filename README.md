@@ -31,7 +31,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
     - **Graphormer-RT: https://github.com/HopkinsLaboratory/Graphormer-RT**
     - **Our Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
 - **Zenodo For Model Weights**:
-    - **"DM" Zenodo: 🚧** (Soon)
+    - **"DM" Zenodo:https://zenodo.org/records/18867980**
     - **"OG" Zenodo: https://zenodo.org/records/15021743**
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
  - **RepoRT: https://github.com/michaelwitting/RepoRT**
@@ -45,7 +45,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **LC–MS Preprocessing** | Tools to clean, format, and structure LC–MS datasets for prediction |
 | **Data Loaders** | Scripts to load, featurize, and register data  |
 | **Workflow Setup** | Setup directory, container, etc. for RP/HILIC/Both RT prediction and annotation  |
-| **Model Training** | Train Graphormer‑RT from scratch (RP) 🚧|
+| **Model Training** | Train Graphormer‑RT from scratch (RP)|
 | **Model Finetuning** | Finetune Graphormer‑RT models (HILIC transfer learning and HILIC finetuning) |
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |

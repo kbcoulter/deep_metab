@@ -5,7 +5,7 @@ set -e
 VERSION_DEFAULT=v0.3
 IMAGE_DEFAULT=dnhem/proj_deepmetab
 RWEIGHTS_DEFAULT=https://zenodo.org/records/15021743/files/oct30_RP_unc.pt?download=1
-HWEIGHTS_DM=""
+HWEIGHTS_DM=https://zenodo.org/records/18867980/files/deep_metab_HILIC_v1.0.pt?download=1
 HWEIGHTS_OG=https://zenodo.org/records/15021743/files/99.pt?download=1
 
 # Active
@@ -77,6 +77,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
+     echo "Setup Script for HILIC and RP Models on HPC"
       echo "Usage:"
       echo "  $0 [options]"
       echo ""

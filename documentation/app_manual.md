@@ -176,7 +176,7 @@ Additional Options Include: seed, attention-dropout, act-dropout, dropout, adam-
 
 ## Making RT Predictions
 
-#### To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
+#### Before making predictions, please ensure that the Data Assumptions mentioned previously are met. To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
 ```bash
 sbatch ./make_predictions/app_evaluate_RP.sh \
   --host-data-dir <path> \   # Default: /my_data/sample_data_0001/
@@ -194,7 +194,7 @@ sbatch ./make_predictions/app_evaluate_HILIC.sh \
 >**Note:** The script will search the checkpoint directory for model weights (for ease of use), please remove or hide unwanted model weights. 
 
 ## Evaluating Predictions
-After running your predictions, ensure that they exist in the correct directory `predictions_HILIC` or `predictions_RP`. For a quick check, you can run the following to get a quick overview report of the predictions made by Graphormer-RT.
+After running your predictions, ensure that they exist in the correct directory: `predictions_HILIC` or `predictions_RP`. For a quick check, you can run the following to get an overview report of the predictions made by Graphormer-RT.
 ```bash
 ./data_prep/evaluate_rt_preds/analyze_predictions.py \ 
   -i <predictions.csv> \ 
