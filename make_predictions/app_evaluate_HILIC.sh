@@ -14,8 +14,8 @@
 set -e
 
 # Defaults 
-HOST_DATA_DIR_DEFAULT="../my_data/HILIC_Posttraining/"
-CHECKPOINT_DIR_DEFAULT="../graphormer_checkpoints_HILIC"
+HOST_DATA_DIR_DEFAULT="./my_data/HILIC_Posttraining/"
+CHECKPOINT_DIR_DEFAULT="./graphormer_checkpoints_HILIC"
 SAVE_PATH_DEFAULT="../../../predictions_HILIC"
 
 #Active
