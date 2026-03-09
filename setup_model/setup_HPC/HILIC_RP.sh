@@ -5,7 +5,7 @@ set -e
 VERSION_DEFAULT=v0.3
 IMAGE_DEFAULT=dnhem/proj_deepmetab
 RWEIGHTS_DEFAULT=https://zenodo.org/records/15021743/files/oct30_RP_unc.pt?download=1
-HWEIGHTS_DM=""
+HWEIGHTS_DM=https://zenodo.org/records/18867980/files/deep_metab_HILIC_v1.0.pt?download=1
 HWEIGHTS_OG=https://zenodo.org/records/15021743/files/99.pt?download=1
 
 # Active
@@ -77,6 +77,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
+     echo "Setup Script for HILIC and RP Models on HPC"
       echo "Usage:"
       echo "  $0 [options]"
       echo ""
@@ -106,11 +107,12 @@ done
 
 # SETUP
 echo "Beginning Setup for Both HILIC and RP"
-cd ../..
-git submodule init
-git submodule update
-echo "Building Apptainer image from ${IMAGE}:${VERSION}"
-apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION}
+echo "Setting Up Graphormer Submodule"
+git submodule update --init --recursive
+#cd ../..
+echo "Building Apptainer Image from ${IMAGE}:${VERSION}"
+echo "  This May Take a While..."
+apptainer build graphormercontainer.sif docker://${IMAGE}:${VERSION} 2>&1 | grep '^INFO:'
 mkdir -p graphormer_checkpoints_HILIC
 wget -O graphormer_checkpoints_HILIC/HILIC_WEIGHTS.pt "${HWEIGHTS}"
 mkdir -p predictions_HILIC

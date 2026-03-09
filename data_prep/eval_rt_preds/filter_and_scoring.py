@@ -36,7 +36,7 @@ def get_args():
     
     #
     
-    # Extra shit
+    # Extra stuffs
     parser.add_argument("--stereo_file", help="Specify the destereo file.",
                         default=None, required=True)
     parser.add_argument("--flag_stereo", action="store_true",

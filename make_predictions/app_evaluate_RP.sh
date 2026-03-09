@@ -14,8 +14,8 @@
 set -e
 
 # Default
-HOST_DATA_DIR_DEFAULT="../my_data/sample_data_0001/"
-CHECKPOINT_DIR_DEFAULT="../graphormer_checkpoints_RP"
+HOST_DATA_DIR_DEFAULT="./my_data/sample_data_0001/"
+CHECKPOINT_DIR_DEFAULT="./graphormer_checkpoints_RP"
 SAVE_PATH_DEFAULT="../../../predictions_RP"
 
 # Active 

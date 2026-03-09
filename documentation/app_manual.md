@@ -35,6 +35,7 @@
 apptainer --version
 scancel
 ```
+If ``command not found`` is returned, your system does not support apptainer and/or SLURM and this workflow will fail. While we do not provide support for these cases, please feel free to refer to our [Script Adaptaiton Guidelines](adaptation.md).
 
 ## Installation
 First, clone the repo from source and navigate into it:
@@ -47,24 +48,24 @@ cd deep_metab
 ## Setup
 From ```deep_metab```:
  1. Setup the git submodule, 
- 2. Build your container: ```graphormercontainer.sif```, 
+ 2. Build your [Apptainer](https://uoracs.github.io/talapas2-knowledge-base/docs/software/apptainer) container: ```graphormercontainer.sif```, 
  3. Setup your necessary directories 
  4. Download your model weights (into checkpoint directories)
  
  All 4 steps can be completed by running one of the following to setup for RP, HILIC, or Both, respectively.
 
 ```bash
-./setup_HPC/RP.sh \
+./setup_model/setup_HPC/RP.sh \
   --version-custom <version> \           # Default: v0.3
   --image-custom <image> \               # Default: dnhem/proj_deepmetab
   --rweights-custom <rp_weights_url> \   # Default: RP weights
 
-./setup_HPC/HILIC.sh \
+./setup_model/setup_HPC/HILIC.sh \
   --version-custom <version> \          # Default: v0.3
   --image-custom <image> \              # Default: dnhem/proj_deepmetab
   --hweights dm|og | --hweights-custom <hilic_weights_url>
 
-./setup_HPC/HILIC_RP.sh \
+./setup_model/setup_HPC/HILIC_RP.sh \
   --version-custom <version> \          # Default: v0.3
   --image-custom <image> \               # Default: dnhem/proj_deepmetab
   --rweights-custom <rp_weights_url> \   # Default: RP weights
@@ -121,7 +122,7 @@ Prepare a single CSV in Graphormer-RT format (`setup_id,smiles,averaged_retentio
   -s <setup_id>
 ```
 
-Use `--file_name_col`, `--retention_time_col`, and `--smiles_col` if your column positions differ (defaults 0, 2, 3). Place `graphormer_input.csv` and your metadata pickle together in e.g. `my_data/<dir_created>/`, then set `HOST_DATA_DIR` in the eval script to that directory.
+Use `--file_name_col`, `--retention_time_col`, and `--smiles_col` if your column positions differ (defaults 0, 2, 3). Place `graphormer_input.csv` and your metadata pickle together in e.g. `my_data/<dir_created>/`, then set `HOST_DATA_DIR` in the eval script to that directory (via the command line).
 
 ### Data Location 
 To simplify your experience, we **highly recommend** placing your data within a new directory here: ```my_data/<dir_created>```
@@ -175,7 +176,7 @@ Additional Options Include: seed, attention-dropout, act-dropout, dropout, adam-
 
 ## Making RT Predictions
 
-#### To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
+#### Before making predictions, please ensure that the Data Assumptions mentioned previously are met. To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
 ```bash
 sbatch ./make_predictions/app_evaluate_RP.sh \
   --host-data-dir <path> \   # Default: /my_data/sample_data_0001/
@@ -193,7 +194,7 @@ sbatch ./make_predictions/app_evaluate_HILIC.sh \
 >**Note:** The script will search the checkpoint directory for model weights (for ease of use), please remove or hide unwanted model weights. 
 
 ## Evaluating Predictions
-After running your predictions, ensure that they exist in the correct directory `predictions_HILIC` or `predictions_RP`. For a quick check, you can run the following to get a quick overview report of the predictions made by Graphormer-RT.
+After running your predictions, ensure that they exist in the correct directory: `predictions_HILIC` or `predictions_RP`. For a quick check, you can run the following to get an overview report of the predictions made by Graphormer-RT.
 ```bash
 ./data_prep/evaluate_rt_preds/analyze_predictions.py \ 
   -i <predictions.csv> \ 

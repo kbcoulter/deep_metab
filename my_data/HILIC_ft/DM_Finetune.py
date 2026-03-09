@@ -8,7 +8,6 @@ import time
 import inspect
 
 from .featurizing_helpers import *
-#print("YOURE DEF IN THE RCORRECT FILE")
 print("DM_Finetune.py accessed. This is ONLY expected during finetuning. Continuing...")
 
 import itertools

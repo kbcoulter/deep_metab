@@ -22,7 +22,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
 - [Warnings](#warning)
 - [Common Issues](#common-issues)
 - [References](documentation/references.md)
-- [Contact](#contact-or-contribute)
+- [Contact or Contribute](#contact-or-contribute)
 - [License](LICENSE)
 
 
@@ -31,8 +31,8 @@ This repository provides a full pipeline for applying modern deep learning to LC
     - **Graphormer-RT: https://github.com/HopkinsLaboratory/Graphormer-RT**
     - **Our Submodule: [https://github.com/kbcoulter/Graphormer-RT](https://github.com/kbcoulter/Graphormer-RT/tree/e98e344e52301fcf73541ca2165fc89c0fbd2869)**
 - **Zenodo For Model Weights**:
-    - **"DM" Zenodo: 🚧**
-    - **"OG" Zenodo: https://zenodo.org/records/15021743**
+    - **Graphormer-RT or "OG" Weights: https://zenodo.org/records/15021743**
+    - **Our or "DM" Weights: https://zenodo.org/records/18867980**
  - **Docker: https://hub.docker.com/r/dnhem/proj_deepmetab**
  - **RepoRT: https://github.com/michaelwitting/RepoRT**
 
@@ -45,7 +45,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **LC–MS Preprocessing** | Tools to clean, format, and structure LC–MS datasets for prediction |
 | **Data Loaders** | Scripts to load, featurize, and register data  |
 | **Workflow Setup** | Setup directory, container, etc. for RP/HILIC/Both RT prediction and annotation  |
-| **Model Training** | Train Graphormer‑RT from scratch (RP) 🚧|
+| **Model Training** | Train Graphormer‑RT from scratch (RP)|
 | **Model Finetuning** | Finetune Graphormer‑RT models (HILIC transfer learning and HILIC finetuning) |
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |
@@ -58,19 +58,20 @@ This repository provides a full pipeline for applying modern deep learning to LC
 
 ## How To:
 
-Choose the manual based on your system permissions:
+Choose the manual based on your preferences:
 
 
 | Environment | Workflow Type | Documentation | Status |
 |-------------|---------------|---------------|--------|
-| **HPC / No Root Access** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
-| **HPC / No Root Access** | Automated | LazyPredict | 🚧 |
-| **Local Machine / Root Access Available** | Step-by-Step | Root Manual Guide | 🚧 |
-| **Local Machine / Root Access Available** | Automated | Root LazyPredict | 🚧 |
+| **HPC / Cloud** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
+| **HPC / Cloud** | Automated | LazyPredict | 🚧 |
 
 
-#### Support for non-HPC machines is in development and is expected soon...
----
+#### Support for Non-HPC Environments  
+
+Because non-HPC resources are limited, we do not provide support for running this tool outside SLURM-managed systems or without Apptainer (Singularity). If you wish to run this workflow in such environments (typically non-cloud or non-HPC), please refer to our **[Script Adaptation Guidelines](documentation/adaptation.md)**.
+
+
 
 ## Warnings:
 
@@ -93,6 +94,9 @@ workspace/Graphormer-RT/my_data/HILIC_ft/
  
 * Obviously Incorrect Predictions: This workflow does not verify that HILIC data is used with the HILIC model (or RP data with the RP model). As a result, it is easy to accidentally input HILIC data into the RP model, which produces extremely inaccurate predictions.
 
+* Apptainer/SLURM Issues: Please run the commands `apptainer --version` and `scancel` to ensure that these tools are available. If they are not, reference this [guide](documentation/adaptation.md).
+
+
 * **If your issue is not shown above, please [raise an issue](https://github.com/kbcoulter/deep_metab/issues/new).**
 
 
@@ -102,7 +106,7 @@ workspace/Graphormer-RT/my_data/HILIC_ft/
 
 #### **Please access our references [here](documentation/references.md)**
 
-Special thanks to the Graphormer‑RT development team and to Maxine Wren and the BGMP instructional team for their mentorship. This work benefited from access to the University of Oregon HPC cluster, [Talapas](https://uoracs.github.io/talapas2-knowledge-base/).
+Special thanks to the Graphormer‑RT development team, our collaborators at PNNL, and to Maxine Wren and the BGMP instructional team for their mentorship. This work benefited from access to the University of Oregon HPC cluster, [Talapas](https://uoracs.github.io/talapas2-knowledge-base/).
 
 
 ## Contact or Contribute
