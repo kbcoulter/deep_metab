@@ -1,7 +1,5 @@
 # Step-by-Step User Manual - No Root Access
 
-> **⚠️ This project is under active development. Expect rapid changes.**
-
 # Table of Contents
 
 **Getting Started**
