@@ -46,7 +46,7 @@ This repository provides a full pipeline for applying modern deep learning to LC
 | **LC–MS Preprocessing** | Tools to clean, format, and structure LC–MS datasets for prediction |
 | **Data Loaders** | Scripts to load, featurize, and register data  |
 | **Workflow Setup** | Setup directory, container, etc. for RP/HILIC/Both RT prediction and annotation  |
-| **Model Training** | Train Graphormer‑RT from scratch (RP)|
+| **Model Training** | Train RP Graphormer‑RT from scratch (Not Recomended)|
 | **Model Finetuning** | Finetune Graphormer‑RT models (HILIC transfer learning and HILIC finetuning) |
 | **RT Prediction** | Generate RT predictions and integrate results back into LC–MS feature tables |
 | **Annotation Scoring Framework** | Score candidate molecules to resolve annotation ambiguities |

@@ -1,7 +1,6 @@
 #!/bin/bash
 ## TAKE EXTREME CAUTION USING THIS METHOD.
-#SBATCH --account=bgmp
-#SBATCH --partition=gpu
+
 #SBATCH --job-name=apptainer_transferlearn_HILIC
 #SBATCH --time=3:00:00
 #SBATCH --nodes=1

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#SBATCH --account=bgmp
-#SBATCH --partition=gpu
 #SBATCH --job-name=apptainer_eval_HILIC
 #SBATCH --time=3:00:00
 #SBATCH --nodes=1

@@ -147,6 +147,8 @@ Then, please move that data into ```my_data/HILIC_ft/```
 
 ### To Finetune:
 ```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./setup_model/app_finetune_HILIC.sh \
   --data-file <path_to_csv> \ 
   --metadata-file <path_to_pickle> \
@@ -176,11 +178,16 @@ Additional Options Include: seed, attention-dropout, act-dropout, dropout, adam-
 
 #### Before making predictions, please ensure that the Data Assumptions mentioned previously are met. To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
 ```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./make_predictions/app_evaluate_RP.sh \
   --host-data-dir <path> \   # Default: /my_data/sample_data_0001/
   --checkpoint-dir <path> \  # Default: /graphormer_checkpoints_RP
   --save-path <path>         # Default: /predictions_RP
-
+```
+```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./make_predictions/app_evaluate_HILIC.sh \
   --host-data-dir <path> \   # Default: /my_data/HILIC_Posttraining/
   --checkpoint-dir <path> \  # Default: /graphormer_checkpoints_HILIC
