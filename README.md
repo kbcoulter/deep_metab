@@ -65,7 +65,7 @@ Choose the manual based on your preferences:
 | Environment | Workflow Type | Documentation | Status |
 |-------------|---------------|---------------|--------|
 | **HPC / Cloud** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
-| **HPC / Cloud** | Automated | [LazyPredict](documentation/app_lazypredict_manual.md) | ✅ |
+| **HPC / Cloud** | Automated | [LazyPredict w/ Nextflow](documentation/nextflow_pipeline.md) | ✅ |
 
 
 #### Support for Non-HPC Environments  
