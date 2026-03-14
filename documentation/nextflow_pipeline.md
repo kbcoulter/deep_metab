@@ -451,3 +451,24 @@ Depending on chromatography type (for this example, we're using RP), the pipelin
 * `rp_Calibration_&_Scoring/` directory
 
 For HILIC, these names change accordingly.
+
+```bash
+(torch) [dnhem@login4 deep_metab]$ nextflow run next.nf 
+
+ N E X T F L O W   ~  version 25.10.4
+
+Launching `next.nf` [elegant_maxwell] DSL2 - revision: 5665a3c46a
+
+executor >  local (6), slurm (1)
+[62/337b41] process > aggregateCSVs (1)        [100%] 1 of 1 ✔
+[74/95c554] process > generateMetadata (1)     [100%] 1 of 1 ✔
+[1d/f87200] process > buildGraphormerInput (1) [100%] 1 of 1 ✔
+[22/c2b243] process > makePredictions (1)      [100%] 1 of 1 ✔
+[54/adfa35] process > stripStereochemistry (1) [100%] 1 of 1 ✔
+[66/d928d9] process > evaluatePredictions (1)  [100%] 1 of 1 ✔
+[6a/b9382e] process > applyScoring (1)         [100%] 1 of 1 ✔
+Completed at: 13-Mar-2026 20:24:02
+Duration    : 1m 46s
+CPU hours   : 0.3
+Succeeded   : 7
+```
