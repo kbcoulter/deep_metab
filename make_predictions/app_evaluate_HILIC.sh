@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#SBATCH --account=bgmp
-#SBATCH --partition=gpu
 #SBATCH --job-name=apptainer_eval_HILIC
 #SBATCH --time=3:00:00
 #SBATCH --nodes=1
@@ -16,7 +14,7 @@ set -e
 # Defaults 
 HOST_DATA_DIR_DEFAULT="./my_data/HILIC_Posttraining/"
 CHECKPOINT_DIR_DEFAULT="./graphormer_checkpoints_HILIC"
-SAVE_PATH_DEFAULT="../../../predictions_HILIC"
+SAVE_PATH_DEFAULT="../../../../predictions_HILIC"
 
 #Active
 HOST_DATA_DIR="${HOST_DATA_DIR_DEFAULT}"
@@ -48,11 +46,17 @@ while [[ $# -gt 0 ]]; do
       SAVE_PATH="$2"
       shift 2
       ;;
+    --container-path)
+      require_arg "$1" "$2"
+      CONTAINER_PATH="$2"
+      shift 2
+      ;;
     -h|--help)
       echo "Usage: sbatch $0 [options]"
       echo ""
       echo "  --host-data-dir <path>      Directory containing 1 .csv + 1 .pickle"
       echo "  --checkpoint-dir <path>     Checkpoint directory"
+      echo "  --container-path <path>     Path to Apptainer image (default: ${CONTAINER_PATH_DEFAULT})"
       echo "  --save-path <path>          Base predictions directory"
       exit 0
       ;;
@@ -75,15 +79,19 @@ fi
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
 
+mkdir -p "${SAVE_PATH}"
+SAVE_PATH_ABS=$(readlink -f "${SAVE_PATH}")
+
 # Run App
 apptainer exec --nv \
     --bind "${CHECKPOINT_DIR}":/workspace/Graphormer-RT/checkpoints_HILIC \
     --bind "${HOST_DATA_DIR}":/data \
-    ./graphormercontainer.sif bash -c "
+    --bind "${SAVE_PATH_ABS}:/predictions" \
+    "${CONTAINER_PATH}" bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
     export HILIC_DATA_FILE_PATH=\"/data/$(basename ${DATA_CSV})\" && \
     export HILIC_METADATA_PATH=\"/data/$(basename ${DATA_PKL})\" && \
-    cd ./Graphormer-RT/graphormer/evaluate/ && \
+    cd /workspace/Graphormer-RT/graphormer/evaluate/ && \
     python evaluate_HILIC.py \
         --user-dir ../../graphormer \
         --num-workers 32 \

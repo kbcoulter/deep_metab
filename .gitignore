@@ -15,3 +15,5 @@
 *my_data/sample_data_0001
 *.pyc
 *notebook.txt
+# additional ignore files
+dom_scripts/

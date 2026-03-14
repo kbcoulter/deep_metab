@@ -1,7 +1,5 @@
 # Step-by-Step User Manual - No Root Access
 
-> **⚠️ This project is under active development. Expect rapid changes.**
-
 # Table of Contents
 
 **Getting Started**
@@ -73,6 +71,10 @@ From ```deep_metab```:
 ```
  #### To confirm setup, please ensure that the configuration shown in the terminal matches expected.
 > **Note:** We recommend leaving options with a default setting unchanged. For `--hweights` (HILIC weights) please specify `dm` (deep_metab), `og` (original Graphormer-RT), or provide your own with `--hweights-custom <custom_url>.` 
+
+# **Nextflow Pipeline [recommended]**
+To easier track and debug your files while running multiple scripts as shown below, we **highly recommend** to use our [nextflow pipeline](nextflow_pipeline.md)! Feel free to read below to understand more of what each script does and how they contribute to the overall pipeline. Should you wish to manually run them, feel free to do so! 
+
 ###
 # **Data Preparation**
 ## Data Preparation
@@ -149,6 +151,8 @@ Then, please move that data into ```my_data/HILIC_ft/```
 
 ### To Finetune:
 ```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./setup_model/app_finetune_HILIC.sh \
   --data-file <path_to_csv> \ 
   --metadata-file <path_to_pickle> \
@@ -178,11 +182,16 @@ Additional Options Include: seed, attention-dropout, act-dropout, dropout, adam-
 
 #### Before making predictions, please ensure that the Data Assumptions mentioned previously are met. To make RT predictions, run one of the following scripts to make RP or HILIC predictions, respectively:
 ```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./make_predictions/app_evaluate_RP.sh \
   --host-data-dir <path> \   # Default: /my_data/sample_data_0001/
   --checkpoint-dir <path> \  # Default: /graphormer_checkpoints_RP
   --save-path <path>         # Default: /predictions_RP
-
+```
+```bash
+export SBATCH_ACCOUNT=bgmp # OR your_account
+export SBATCH_PARTITION=gpu # OR other_gpu
 sbatch ./make_predictions/app_evaluate_HILIC.sh \
   --host-data-dir <path> \   # Default: /my_data/HILIC_Posttraining/
   --checkpoint-dir <path> \  # Default: /graphormer_checkpoints_HILIC
