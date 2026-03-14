@@ -12,14 +12,18 @@
 set -e
 
 # Default
-HOST_DATA_DIR_DEFAULT="./my_data/sample_data_0001/"
+HOST_DATA_DIR_DEFAULT="./my_data/example_data/"
 CHECKPOINT_DIR_DEFAULT="./graphormer_checkpoints_RP"
-SAVE_PATH_DEFAULT="../../../predictions_RP"
+SAVE_PATH_DEFAULT="../../../../predictions_RP"
 
 # Active 
 HOST_DATA_DIR="${HOST_DATA_DIR_DEFAULT}"
 CHECKPOINT_DIR="${CHECKPOINT_DIR_DEFAULT}"
 SAVE_PATH="${SAVE_PATH_DEFAULT}"
+
+# Containers
+CONTAINER_PATH_DEFAULT="./graphormercontainer.sif"
+CONTAINER_PATH="${CONTAINER_PATH_DEFAULT}"
 
 # Args
 require_arg() {
@@ -46,12 +50,18 @@ while [[ $# -gt 0 ]]; do
       SAVE_PATH="$2"
       shift 2
       ;;
+    --container-path)
+      require_arg "$1" "$2"
+      CONTAINER_PATH="$2"
+      shift 2
+      ;;
     -h|--help)
       echo "Usage: $0 [options]"
       echo ""
       echo "  --host-data-dir <path>      Directory containing 1 .csv + 1 .pkl (default: ${HOST_DATA_DIR_DEFAULT})"
       echo "  --checkpoint-dir <path>     Checkpoint directory (default: ${CHECKPOINT_DIR_DEFAULT})"
       echo "  --save-path <path>          Path to save predictions (default: ${SAVE_PATH_DEFAULT})"
+      echo "  --container-path <path>     Path to Apptainer image (default: ${CONTAINER_PATH_DEFAULT})"
       exit 0
       ;;
     *)
@@ -72,15 +82,19 @@ fi
 
 DATA_DIR="${SLURM_JOB_ID}.csv"
 
+mkdir -p "${SAVE_PATH}"
+SAVE_PATH_ABS=$(readlink -f "${SAVE_PATH}")
+
 # Run App
 apptainer exec --nv \
     --bind "${CHECKPOINT_DIR}":/workspace/Graphormer-RT/checkpoints_RP \
     --bind "${HOST_DATA_DIR}":/data \
-    ./graphormercontainer.sif bash -c "
+    --bind "${SAVE_PATH_ABS}:/predictions" \
+    "${CONTAINER_PATH}" bash -c "
     source /opt/conda/bin/activate /opt/conda/envs/graphormer-rt && \
     export RP_DATA_FILE_PATH=\"/data/$(basename ${DATA_CSV})\" && \
     export RP_METADATA_PATH=\"/data/$(basename ${DATA_PKL})\" && \
-    cd ./Graphormer-RT/graphormer/evaluate/ && \
+    cd /workspace/Graphormer-RT/graphormer/evaluate/ && \
     python evaluate.py \
         --user-dir ../../graphormer \
         --num-workers 32 \
@@ -98,7 +112,7 @@ apptainer exec --nv \
         --mlp-layers 5 \
         --batch-size 64 \
         --num-classes 1 \
-        --save-path '${SAVE_PATH}/$DATA_DIR' \
+        --save-path '/predictions/$DATA_DIR' \
         --save-dir '/workspace/Graphormer-RT/checkpoints_RP/' \
         --split train
 "

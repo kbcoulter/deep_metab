@@ -71,6 +71,10 @@ From ```deep_metab```:
 ```
  #### To confirm setup, please ensure that the configuration shown in the terminal matches expected.
 > **Note:** We recommend leaving options with a default setting unchanged. For `--hweights` (HILIC weights) please specify `dm` (deep_metab), `og` (original Graphormer-RT), or provide your own with `--hweights-custom <custom_url>.` 
+
+# **Nextflow Pipeline [recommended]**
+To easier track and debug your files while running multiple scripts as shown below, we **highly recommend** to use our [nextflow pipeline](nextflow_pipeline.md)! Feel free to read below to understand more of what each script does and how they contribute to the overall pipeline. Should you wish to manually run them, feel free to do so! 
+
 ###
 # **Data Preparation**
 ## Data Preparation
