@@ -66,7 +66,9 @@ Choose the manual based on your preferences:
 |-------------|---------------|---------------|--------|
 | **HPC / Cloud** | Step-by-Step | [Manual Guide](documentation/app_manual.md) | ✅ |
 | **HPC / Cloud** | Automated | [LazyPredict w/ Nextflow](documentation/nextflow_pipeline.md) | ✅ |
+| **Local on Windows** | Building Docker Image* | [Docker Guide Installation](documentation/docker_guide.md) | ✅ |
 
+> *Note: Building the docker image is not required for our workflow since users can easily pull it from dockerhub as listed under [quick links](#quick-links). The Dockerfile is only provided to showcase the configurations required to construct the image.
 
 #### Support for Non-HPC Environments  
 
